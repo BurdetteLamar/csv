@@ -22,7 +22,7 @@ OptionParser.new do |p|
   p.program_name = File.basename $0
   p.version = CSV::VERSION
   p.release = nil
-  p.summary_indent = ' ' * 4
+  p.summary_indent = ''
   p.banner = <<-EOF
 Usage: #{command_name(p.program_name)} [#{place_holder_name('options')}]
 
