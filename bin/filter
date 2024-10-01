@@ -15,6 +15,16 @@ def place_holder_name(s); ansi( 3, tt(s)); end
 def var_name(s);          ansi(35, tt(s)); end
 def option_name(s);       ansi(33, tt(s)); end
 
+def parse_converters(s)
+  converters = []
+  s.split(',').each do |name|
+    name.sub(/^:/, '')
+    sym = name.to_sym
+    converters.push(name)
+  end
+  converters
+end
+
 options = {}
 
 OptionParser.new do |p|
@@ -22,7 +32,7 @@ OptionParser.new do |p|
   p.program_name = File.basename $0
   p.version = CSV::VERSION
   p.release = nil
-  p.summary_indent = ''
+  p.summary_indent = ' ' * 4
   p.banner = <<-EOF
 Usage: #{command_name(p.program_name)} [#{place_holder_name('options')}]
 
@@ -81,18 +91,71 @@ EOF
   )
 
   p.separator(nil)
-  p.on('--input_row_sep SEP',
-       'Input row separator (string).'
+  p.on('--converters STR',
+       'Input field converters;',
+       'STR is comma-separated converter names (leading colon optional).'
        ) do |value|
-    options[:input_row_sep] = value
+    options[:converters] = parse_converters(value)
   end
-  p.on('--input_col_sep SEP',
-       'Input column separator (string).') do |value|
+  p.on('--empty_value STR',
+       'Value to be output for empty input field.') do |value|
+    options[:empty_value] = value
+  end
+  p.on('--headers',
+       'Treat the first input row as headers.') do
+    options[:headers] = true
+  end
+  p.on('--header_converters STR',
+       'Input header converters;',
+       'STR is comma-separated converter names (leading colon optional).'
+  ) do |value|
+    options[:header_converters] = parse_converters(value)
+  end
+  p.on('--input_col_sep STR',
+       'Input column separator.') do |value|
     options[:input_col_sep] = value
   end
   p.on('--input_quote_char CHAR',
        'Input quote character.') do |value|
     options[:input_quote_char] = value
+  end
+  p.on('--input_row_sep STR',
+       'Input row separator.'
+  ) do |value|
+    options[:input_row_sep] = value
+  end
+  p.on('--liberal_parsing',
+       'Attempt to parse non-conformant input.') do
+    options[:liberal_parsing] = true
+  end
+  p.on('--max_field_size N',
+       'Maximum field size (characters)') do |value|
+    options[:max_field_size] = value
+  end
+  p.on('--nil_value STR',
+       'Value to be substituted for nil input field.') do |value|
+    options[:nil_value] = value
+  end
+  p.on('--return_headers',
+       'Method shift returns header row.') do
+    options[:return_headers] = true
+  end
+  p.on('--skip_blanks',
+       'Ignore blank lines.') do
+    options[:skip_blanks] = true
+  end
+  p.on('--skip_lines STR',
+       'Ignore comment lines;',
+       'STR is converted to a Regexp that identifies comment lines.') do |value|
+    options[:skip_lines] = Regexp.new(value)
+  end
+  p.on('--strip',
+       'Strip whitespace from input fields.') do
+    options[:strip] = true
+  end
+  p.on('--unconverted_fields',
+       'Define method unconverted_fields for each created CSV::Row object.') do
+    options[:unconverted_fields] = true
   end
 
   p.separator(nil)
@@ -101,10 +164,9 @@ EOF
   )
 
   p.separator(nil)
-  p.on('--output_row_sep SEP',
-       'Output row separator (string).'
-  ) do |value|
-    options[:output_row_sep] = value
+  p.on('--force_quotes',
+       'Double-quote each output field.') do
+    options[:force_quotes] = true
   end
   p.on('--output_col_sep SEP',
        'Output column separator (string).') do |value|
@@ -114,23 +176,50 @@ EOF
        'Output quote character.') do |value|
     options[:output_quote_char] = value
   end
+  p.on('--output_row_sep SEP',
+       'Output row separator (string).'
+  ) do |value|
+    options[:output_row_sep] = value
+  end
+  p.on('--quote_empty',
+       'Double-quote each empty output field.') do
+    options[:quote_empty] = true
+  end
+  p.on('--write_converters STR',
+       'Output field converters;',
+       'STR is comma-separated converter names (leading colon optional).'
+  ) do |value|
+    options[:write_converters] = parse_converters(value)
+  end
+  p.on('--write_headers',
+       'Copy input headers to output.') do
+    options[:write_headers] = true
+  end
+  p.on('--write_empty_value STR',
+       'Value to be substituted for empty output field.') do |value|
+    options[:write_empty_value] = value
+  end
+  p.on('--write_nil_value STR',
+       'Value to be substituted for nil output field.') do |value|
+    options[:write_nil_value] = value
+  end
 
   p.separator(nil)
   p.separator('Input/Output Options')
 
   p.separator(nil)
-  p.on('--row_sep SEP',
-       'Row separator (string).'
-  ) do |value|
-    options[:row_sep] = value
-  end
-  p.on('--col_sep SEP',
+  p.on('-c', '--col_sep SEP',
        'Column separator (string).') do |value|
     options[:col_sep] = value
   end
-  p.on('--quote_char CHAR',
+  p.on('-q', '--quote_char CHAR',
        'Quote character.') do |value|
     options[:quote_char] = value
+  end
+  p.on('-r', '--row_sep SEP',
+       'Row separator (string).'
+  ) do |value|
+    options[:row_sep] = value
   end
 
   p.separator(nil)
