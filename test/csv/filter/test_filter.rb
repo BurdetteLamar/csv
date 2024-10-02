@@ -19,8 +19,9 @@ class TestFilter < Minitest::Test
     Rows.each do |cols|
       rows.push(cols.join(col_sep))
     end
-    rows.push('') if append_row_sep
-    rows.join(row_sep)
+    s = rows.join(row_sep)
+    s += row_sep if append_row_sep
+    s
   end
 
   def do_test(csv_s, exp_out_s, options: {}, exp_err_s: '')
