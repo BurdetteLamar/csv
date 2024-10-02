@@ -51,10 +51,8 @@ class TestFilter < Minitest::Test
 
   def test_option_r
     row_sep = 'X'
-    [
-      {'-r' => row_sep},
-      {'--row_sep' => row_sep},
-    ].each do |options_h|
+    %w[-r --row_sep].each do |option_name|
+      options_h = {option_name => row_sep}
       csv_s = make_csv_s(row_sep, ColSep)
       exp_out_s = make_csv_s(row_sep, ColSep, append_row_sep: true)
       do_test(csv_s, exp_out_s, options: options_h)
@@ -79,10 +77,8 @@ class TestFilter < Minitest::Test
 
   def test_option_c
     col_sep = 'X'
-    [
-      {'-c' => col_sep},
-      {'--col_sep' => col_sep},
-    ].each do |options_h|
+    %w[-c --col_sep].each do |option_name|
+      options_h = {option_name => col_sep}
       csv_s = make_csv_s(RowSep, col_sep)
       exp_out_s = make_csv_s(RowSep, col_sep, append_row_sep: true)
       do_test(csv_s, exp_out_s, options: options_h)
