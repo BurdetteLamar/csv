@@ -109,4 +109,11 @@ class TestFilter < Minitest::Test
     do_test(csv_s, exp_out_pat: exp_out_pat, options: options_h)
   end
 
+  def test_option_invalid
+    %w[-Z --ZZZ].each do |option_name|
+      options_h = {option_name => nil}
+      do_test('', exp_err_pat: 'InvalidOption', options: options_h)
+    end
+  end
+
 end
