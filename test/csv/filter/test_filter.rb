@@ -62,16 +62,16 @@ class TestFilter < Minitest::Test
   def test_option_input_row_sep
     input_row_sep = 'X'
     options_h = {'--input_row_sep' => input_row_sep}
-    csv_s = "aaa,bbb,ccc#{input_row_sep}ddd,eee,fff"
-    exp_out_s = "aaa,bbb,ccc#{RowSep}ddd,eee,fff#{RowSep}"
+    csv_s = make_csv_s(input_row_sep, ColSep)
+    exp_out_s = make_csv_s(RowSep, ColSep) + RowSep
     do_test(csv_s, exp_out_s, options_h)
   end
 
   def test_option_output_row_sep
     output_row_sep = 'X'
     options_h = {'--output_row_sep' => output_row_sep}
-    csv_s = "aaa,bbb,ccc#{RowSep}ddd,eee,fff"
-    exp_out_s = "aaa,bbb,ccc#{output_row_sep}ddd,eee,fff#{output_row_sep}"
+    csv_s = make_csv_s(RowSep, ColSep)
+    exp_out_s = make_csv_s(output_row_sep, ColSep) + output_row_sep
     do_test(csv_s, exp_out_s, options_h)
   end
 
@@ -83,6 +83,8 @@ class TestFilter < Minitest::Test
     ].each do |options_h|
       csv_s = "aaa#{col_sep}bbb#{col_sep}ccc#{RowSep}ddd#{col_sep}eee#{col_sep}fff"
       exp_out_s = "aaa#{col_sep}bbb#{col_sep}ccc#{RowSep}ddd#{col_sep}eee#{col_sep}fff#{RowSep}"
+      csv_s = make_csv_s(RowSep, col_sep)
+      exp_out_s = make_csv_s(RowSep, col_sep) + RowSep
       do_test(csv_s, exp_out_s, options_h)
     end
   end
