@@ -48,11 +48,30 @@ class TestFilter < Minitest::Test
     do_test(csv_s, exp_out_pat: exp_out_pat)
   end
 
+  def test_invalid_option
+    %w[-Z --ZZZ].each do |option_name|
+      options_h = {option_name => nil}
+      do_test('', exp_err_pat: 'InvalidOption', options: options_h)
+    end
+  end
+
   def test_option_h
     %w[-h --help].each do |option_name|
       options_h = {option_name => nil}
       csv_s = make_csv_s
       exp_out_pat = /Usage/
+      do_test(csv_s, exp_out_pat: exp_out_pat, options: options_h)
+    end
+  end
+
+  # Input/output options.
+
+  def test_option_c
+    col_sep = 'X'
+    %w[-c --col_sep].each do |option_name|
+      options_h = {option_name => col_sep}
+      csv_s = make_csv_s(col_sep: col_sep)
+      exp_out_pat = csv_s
       do_test(csv_s, exp_out_pat: exp_out_pat, options: options_h)
     end
   end
@@ -67,31 +86,7 @@ class TestFilter < Minitest::Test
     end
   end
 
-  def test_option_input_row_sep
-    input_row_sep = 'X'
-    options_h = {'--input_row_sep' => input_row_sep}
-    csv_s = make_csv_s(row_sep: input_row_sep)
-    exp_out_pat = make_csv_s
-    do_test(csv_s, exp_out_pat: exp_out_pat, options: options_h)
-  end
-
-  def test_option_output_row_sep
-    output_row_sep = 'X'
-    options_h = {'--output_row_sep' => output_row_sep}
-    csv_s = make_csv_s
-    exp_out_pat = make_csv_s(row_sep: output_row_sep)
-    do_test(csv_s, exp_out_pat: exp_out_pat, options: options_h)
-  end
-
-  def test_option_c
-    col_sep = 'X'
-    %w[-c --col_sep].each do |option_name|
-      options_h = {option_name => col_sep}
-      csv_s = make_csv_s(col_sep: col_sep)
-      exp_out_pat = csv_s
-      do_test(csv_s, exp_out_pat: exp_out_pat, options: options_h)
-    end
-  end
+  # Input options.
 
   def test_option_input_col_sep
     input_col_sep = 'X'
@@ -101,6 +96,16 @@ class TestFilter < Minitest::Test
     do_test(csv_s, exp_out_pat: exp_out_pat, options: options_h)
   end
 
+  def test_option_input_row_sep
+    input_row_sep = 'X'
+    options_h = {'--input_row_sep' => input_row_sep}
+    csv_s = make_csv_s(row_sep: input_row_sep)
+    exp_out_pat = make_csv_s
+    do_test(csv_s, exp_out_pat: exp_out_pat, options: options_h)
+  end
+
+  # Output options.
+
   def test_option_output_col_sep
     output_col_sep = 'X'
     options_h = {'--output_col_sep' => output_col_sep}
@@ -109,11 +114,12 @@ class TestFilter < Minitest::Test
     do_test(csv_s, exp_out_pat: exp_out_pat, options: options_h)
   end
 
-  def test_invalid_option
-    %w[-Z --ZZZ].each do |option_name|
-      options_h = {option_name => nil}
-      do_test('', exp_err_pat: 'InvalidOption', options: options_h)
-    end
+  def test_option_output_row_sep
+    output_row_sep = 'X'
+    options_h = {'--output_row_sep' => output_row_sep}
+    csv_s = make_csv_s
+    exp_out_pat = make_csv_s(row_sep: output_row_sep)
+    do_test(csv_s, exp_out_pat: exp_out_pat, options: options_h)
   end
 
 end
