@@ -3,11 +3,9 @@
 require 'optparse'
 require 'csv'
 
-def ansi(n, s)
-  # return s unless $stdout.tty?
-  "\e[#{n}m#{s}\e[0m"
-end
-
+# Returns an array of converter names.
+# \String +s+ contains a comma-separated list of converter names;
+# each optionally begins with a colon.
 def parse_converters(s)
   converters = []
   s.split(',').each do |name|
@@ -240,4 +238,3 @@ end.parse!
 
 CSV.filter(**options) do |row|
 end
-
