@@ -42,17 +42,12 @@ class TestFilter < Minitest::Test
     end
   end
 
+  # General options.
+
   def test_no_options
     csv_s = make_csv_s
     exp_out_pat = csv_s
     do_test(csv_s, exp_out_pat: exp_out_pat)
-  end
-
-  def test_invalid_option
-    %w[-Z --ZZZ].each do |option_name|
-      options_h = {option_name => nil}
-      do_test('', exp_err_pat: 'InvalidOption', options: options_h)
-    end
   end
 
   def test_option_h
@@ -61,6 +56,22 @@ class TestFilter < Minitest::Test
       csv_s = make_csv_s
       exp_out_pat = /Usage/
       do_test(csv_s, exp_out_pat: exp_out_pat, options: options_h)
+    end
+  end
+
+  def test_option_v
+    %w[-v --version].each do |option_name|
+      options_h = {option_name => nil}
+      csv_s = make_csv_s
+      exp_out_pat = /\d+\.\d+\.\d+/
+      do_test(csv_s, exp_out_pat: exp_out_pat, options: options_h)
+    end
+  end
+
+  def test_invalid_option
+    %w[-Z --ZZZ].each do |option_name|
+      options_h = {option_name => nil}
+      do_test('', exp_err_pat: 'InvalidOption', options: options_h)
     end
   end
 
