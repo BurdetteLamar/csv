@@ -14,14 +14,13 @@ class TestFilter < Minitest::Test
     %w[ddd eee fff],
   ]
 
-  def make_csv_s(row_sep, col_sep, append_row_sep: false)
+  def make_csv_s(row_sep: RowSep, col_sep: ColSep)
     rows = []
     Rows.each do |cols|
       rows.push(cols.join(col_sep))
     end
-    s = rows.join(row_sep)
-    s += row_sep if append_row_sep
-    s
+    rows.push('')
+    rows.join(row_sep)
   end
 
   def do_test(csv_s, exp_out_s, options: {}, exp_err_s: '')
@@ -44,8 +43,8 @@ class TestFilter < Minitest::Test
   end
 
   def test_no_options
-    csv_s = make_csv_s(RowSep, ColSep)
-    exp_out_s = make_csv_s(RowSep, ColSep, append_row_sep: true)
+    csv_s = make_csv_s
+    exp_out_s = csv_s
     do_test(csv_s, exp_out_s)
   end
 
@@ -53,8 +52,8 @@ class TestFilter < Minitest::Test
     row_sep = 'X'
     %w[-r --row_sep].each do |option_name|
       options_h = {option_name => row_sep}
-      csv_s = make_csv_s(row_sep, ColSep)
-      exp_out_s = make_csv_s(row_sep, ColSep, append_row_sep: true)
+      csv_s = make_csv_s(row_sep: row_sep)
+      exp_out_s = csv_s
       do_test(csv_s, exp_out_s, options: options_h)
     end
   end
@@ -62,16 +61,16 @@ class TestFilter < Minitest::Test
   def test_option_input_row_sep
     input_row_sep = 'X'
     options_h = {'--input_row_sep' => input_row_sep}
-    csv_s = make_csv_s(input_row_sep, ColSep)
-    exp_out_s = make_csv_s(RowSep, ColSep, append_row_sep: true)
+    csv_s = make_csv_s(row_sep: input_row_sep)
+    exp_out_s = make_csv_s
     do_test(csv_s, exp_out_s, options: options_h)
   end
 
   def test_option_output_row_sep
     output_row_sep = 'X'
     options_h = {'--output_row_sep' => output_row_sep}
-    csv_s = make_csv_s(RowSep, ColSep)
-    exp_out_s = make_csv_s(output_row_sep, ColSep, append_row_sep: true)
+    csv_s = make_csv_s
+    exp_out_s = make_csv_s(row_sep: output_row_sep)
     do_test(csv_s, exp_out_s, options: options_h)
   end
 
@@ -79,8 +78,8 @@ class TestFilter < Minitest::Test
     col_sep = 'X'
     %w[-c --col_sep].each do |option_name|
       options_h = {option_name => col_sep}
-      csv_s = make_csv_s(RowSep, col_sep)
-      exp_out_s = make_csv_s(RowSep, col_sep, append_row_sep: true)
+      csv_s = make_csv_s(col_sep: col_sep)
+      exp_out_s = csv_s
       do_test(csv_s, exp_out_s, options: options_h)
     end
   end
