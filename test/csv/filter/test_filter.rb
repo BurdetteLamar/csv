@@ -62,4 +62,16 @@ class TestFilter < Minitest::Test
     do_test(csv_s, exp_out_s, options_h)
   end
 
+  def test_option_c
+    col_sep = 'X'
+    [
+      {'-c' => col_sep},
+      {'--col_sep' => col_sep},
+    ].each do |options_h|
+      csv_s = "aaa#{col_sep}bbb#{col_sep}ccc#{RowSep}ddd#{col_sep}eee#{col_sep}fff"
+      exp_out_s = "aaa#{col_sep}bbb#{col_sep}ccc#{RowSep}ddd#{col_sep}eee#{col_sep}fff#{RowSep}"
+      do_test(csv_s, exp_out_s, options_h)
+    end
+  end
+
 end
