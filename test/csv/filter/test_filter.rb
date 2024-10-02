@@ -14,15 +14,16 @@ class TestFilter < Minitest::Test
     %w[ddd eee fff],
   ]
 
-  def make_csv_s(row_sep, col_sep)
+  def make_csv_s(row_sep, col_sep, append_row_sep: false)
     rows = []
     Rows.each do |cols|
       rows.push(cols.join(col_sep))
     end
+    rows.push('') if append_row_sep
     rows.join(row_sep)
   end
 
-  def do_test(csv_s, exp_out_s, options = {}, exp_err_s = "")
+  def do_test(csv_s, exp_out_s, options: {}, exp_err_s: '')
     options_s = ''
     options.each_pair do |name, value|
       option_s = name
@@ -43,7 +44,7 @@ class TestFilter < Minitest::Test
 
   def test_no_options
     csv_s = make_csv_s(RowSep, ColSep)
-    exp_out_s = csv_s + RowSep
+    exp_out_s = make_csv_s(RowSep, ColSep, append_row_sep: true)
     do_test(csv_s, exp_out_s)
   end
 
@@ -54,8 +55,8 @@ class TestFilter < Minitest::Test
       {'--row_sep' => row_sep},
     ].each do |options_h|
       csv_s = make_csv_s(row_sep, ColSep)
-      exp_out_s = csv_s + row_sep
-      do_test(csv_s, exp_out_s, options_h)
+      exp_out_s = make_csv_s(row_sep, ColSep, append_row_sep: true)
+      do_test(csv_s, exp_out_s, options: options_h)
     end
   end
 
@@ -63,16 +64,16 @@ class TestFilter < Minitest::Test
     input_row_sep = 'X'
     options_h = {'--input_row_sep' => input_row_sep}
     csv_s = make_csv_s(input_row_sep, ColSep)
-    exp_out_s = make_csv_s(RowSep, ColSep) + RowSep
-    do_test(csv_s, exp_out_s, options_h)
+    exp_out_s = make_csv_s(RowSep, ColSep, append_row_sep: true)
+    do_test(csv_s, exp_out_s, options: options_h)
   end
 
   def test_option_output_row_sep
     output_row_sep = 'X'
     options_h = {'--output_row_sep' => output_row_sep}
     csv_s = make_csv_s(RowSep, ColSep)
-    exp_out_s = make_csv_s(output_row_sep, ColSep) + output_row_sep
-    do_test(csv_s, exp_out_s, options_h)
+    exp_out_s = make_csv_s(output_row_sep, ColSep, append_row_sep: true)
+    do_test(csv_s, exp_out_s, options: options_h)
   end
 
   def test_option_c
@@ -81,11 +82,9 @@ class TestFilter < Minitest::Test
       {'-c' => col_sep},
       {'--col_sep' => col_sep},
     ].each do |options_h|
-      csv_s = "aaa#{col_sep}bbb#{col_sep}ccc#{RowSep}ddd#{col_sep}eee#{col_sep}fff"
-      exp_out_s = "aaa#{col_sep}bbb#{col_sep}ccc#{RowSep}ddd#{col_sep}eee#{col_sep}fff#{RowSep}"
       csv_s = make_csv_s(RowSep, col_sep)
-      exp_out_s = make_csv_s(RowSep, col_sep) + RowSep
-      do_test(csv_s, exp_out_s, options_h)
+      exp_out_s = make_csv_s(RowSep, col_sep, append_row_sep: true)
+      do_test(csv_s, exp_out_s, options: options_h)
     end
   end
 
