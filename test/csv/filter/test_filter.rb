@@ -7,6 +7,21 @@ require 'tempfile'
 
 class TestFilter < Minitest::Test
 
+  RowSep = "\n"
+  ColSep = ','
+  Rows = [
+    %w[aaa bbb ccc],
+    %w[ddd eee fff],
+  ]
+
+  def make_csv_s(row_sep, col_sep)
+    rows = []
+    Rows.each do |cols|
+      rows.push(cols.join(col_sep))
+    end
+    rows.join(row_sep)
+  end
+
   def do_test(csv_s, exp_out_s, options = {}, exp_err_s = "")
     options_s = ''
     options.each_pair do |name, value|
@@ -27,12 +42,10 @@ class TestFilter < Minitest::Test
   end
 
   def test_no_options
-    csv_s = "aaa,bbb,ccc\nddd,eee,fff"
-    exp_out_s = csv_s + "\n"
+    csv_s = make_csv_s(RowSep, ColSep)
+    exp_out_s = csv_s + RowSep
     do_test(csv_s, exp_out_s)
   end
-
-  RowSep = "\n"
 
   def test_option_r
     row_sep = 'X'
@@ -40,8 +53,8 @@ class TestFilter < Minitest::Test
       {'-r' => row_sep},
       {'--row_sep' => row_sep},
     ].each do |options_h|
-      csv_s = "aaa,bbb,ccc#{row_sep}ddd,eee,fff"
-      exp_out_s = "aaa,bbb,ccc#{row_sep}ddd,eee,fff#{row_sep}"
+      csv_s = make_csv_s(row_sep, ColSep)
+      exp_out_s = csv_s + row_sep
       do_test(csv_s, exp_out_s, options_h)
     end
   end
