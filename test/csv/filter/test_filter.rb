@@ -84,4 +84,20 @@ class TestFilter < Minitest::Test
     end
   end
 
+  def test_option_input_col_sep
+    input_col_sep = 'X'
+    options_h = {'--input_col_sep' => input_col_sep}
+    csv_s = make_csv_s(col_sep: input_col_sep)
+    exp_out_s = make_csv_s
+    do_test(csv_s, exp_out_s, options: options_h)
+  end
+
+  def test_option_output_col_sep
+    output_col_sep = 'X'
+    options_h = {'--output_col_sep' => output_col_sep}
+    csv_s = make_csv_s
+    exp_out_s = make_csv_s(col_sep: output_col_sep)
+    do_test(csv_s, exp_out_s, options: options_h)
+  end
+
 end
