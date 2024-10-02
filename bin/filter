@@ -168,16 +168,16 @@ EOF
        'Double-quote each output field.') do
     options[:force_quotes] = true
   end
-  p.on('--output_col_sep SEP',
-       'Output column separator (string).') do |value|
+  p.on('--output_col_sep STR',
+       'Output column separator.') do |value|
     options[:output_col_sep] = value
   end
   p.on('--output_quote_char CHAR',
        'Output quote character.') do |value|
     options[:output_quote_char] = value
   end
-  p.on('--output_row_sep SEP',
-       'Output row separator (string).'
+  p.on('--output_row_sep STR',
+       'Output row separator.'
   ) do |value|
     options[:output_row_sep] = value
   end
@@ -208,16 +208,16 @@ EOF
   p.separator('Input/Output Options')
 
   p.separator(nil)
-  p.on('-c', '--col_sep SEP',
-       'Column separator (string).') do |value|
+  p.on('-c', '--col_sep STR',
+       'Column separator.') do |value|
     options[:col_sep] = value
   end
   p.on('-q', '--quote_char CHAR',
        'Quote character.') do |value|
     options[:quote_char] = value
   end
-  p.on('-r', '--row_sep SEP',
-       'Row separator (string).'
+  p.on('-r', '--row_sep STR',
+       'Row separator.'
   ) do |value|
     options[:row_sep] = value
   end
