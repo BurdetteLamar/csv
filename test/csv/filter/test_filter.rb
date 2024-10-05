@@ -8,6 +8,7 @@ require 'tempfile'
 class TestFilter < Minitest::Test
 
   CliOptionNames = {
+    nil: %w[],
     col_sep: %w[-c --col_sep],
     row_sep: %w[-r --row_sep],
     quote_char: %w[-q --quote_char],
@@ -17,10 +18,10 @@ class TestFilter < Minitest::Test
 
     attr_accessor :sym, :cli_option_names, :argument_value
 
-    def initialize(sym, argument_value = nil)
-      self.sym = sym
+    def initialize(sym = nil, argument_value = nil)
+      self.sym = sym || :nil
       self.argument_value = argument_value
-      self.cli_option_names = CliOptionNames[sym]
+      self.cli_option_names = CliOptionNames[self.sym]
     end
 
   end
@@ -53,7 +54,7 @@ class TestFilter < Minitest::Test
     filepath
   end
 
-  def do_verification(test_method, csv_s, option)
+  def do_verification(test_method, csv_s, option = Option.new)
     Dir.mktmpdir do |dirpath|
       filepath = csv_filepath(csv_s, dirpath, option.sym)
       option.cli_option_names.each do |cli_option_name|
@@ -105,7 +106,7 @@ class TestFilter < Minitest::Test
   def test_no_options
     csv_s = make_csv_s
     exp_out_pat = csv_s
-    do_test(csv_s, exp_out_pat: exp_out_pat)
+    do_verification(__method__, csv_s)
   end
 
   def test_option_h
