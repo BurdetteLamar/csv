@@ -193,20 +193,15 @@ class TestFilter < Minitest::Test
     do_verification(__method__, csv_s, option)
   end
 
-  def zzz_test_option_q
-    quote_char = "'"
+  def test_option_q
+    quote_char = "Z"
     rows = [
       %w[foo 0],
       %w['bar' 1],
       %w["baz", 2],
+      %w[ZbatZ, 2],
     ]
     csv_s = make_csv_s(rows: rows)
-    p ''
-    p quote_char
-    p rows
-    p csv_s
-    p ''
-    return
     option = Option.new(:quote_char, quote_char)
     do_verification(__method__, csv_s, option)
   end
