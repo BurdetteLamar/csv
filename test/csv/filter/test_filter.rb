@@ -8,10 +8,10 @@ require 'tempfile'
 class TestFilter < Minitest::Test
 
   CliOptionNames = {
-    nil: %w[],
     col_sep: %w[-c --col_sep],
     row_sep: %w[-r --row_sep],
     quote_char: %w[-q --quote_char],
+    output_row_sep: %w[--output_row_sep --out_row_sep],
   }
 
   class Option
@@ -95,6 +95,14 @@ class TestFilter < Minitest::Test
         api_options = {primary_option.sym => primary_option.argument_value}
         options.each do |option|
           api_options[option.sym] = option.argument_value
+        end
+        api_options.transform_keys! do |key|
+          key_s = key.to_s
+          key_s.sub!(/^input_/, '')
+          key_s.sub!(/^output_/, '')
+          key_s.sub!(/^in_/, '')
+          key_s.sub!(/^in_/, '')
+          key_s.to_sym
         end
         exp_out_s = get_exp_value(filepath, api_options)
         assert_equal(exp_out_s, act_out_s, test_method)
@@ -216,14 +224,14 @@ class TestFilter < Minitest::Test
     end
   end
 
-  def zzz_test_option_output_row_sep
-    output_row_sep = 'X'
-    %w[--out_row_sep --output_row_sep].each do |option_name|
-      options_h = {option_name => output_row_sep}
-      csv_s = make_csv_s
-      exp_out_pat = make_csv_s(row_sep: output_row_sep)
-      do_test(csv_s, exp_out_pat: exp_out_pat, options: options_h)
-    end
+  def test_option_output_row_sep
+    row_sep = 'X'
+    output_row_sep = 'A'
+    csv_s = make_csv_s(row_sep: row_sep)
+    options = [
+      Option.new(:output_row_sep, output_row_sep)
+    ]
+    verify_via_api(__method__, csv_s, options)
   end
 
   # Input/output options.
