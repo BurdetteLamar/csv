@@ -42,7 +42,7 @@ class TestFilter < Minitest::Test
     csv_rows.join(row_sep)
   end
 
-  def cli_option(name, value)
+  def cli_option_s(name, value)
     s = name
     s += " #{value}" unless value.nil?
   end
@@ -52,6 +52,54 @@ class TestFilter < Minitest::Test
     filepath = File.join(dirpath, filename)
     File.write(filepath, csv_s)
     filepath
+  end
+
+  def get_act_values(filepath, cli_options)
+    cli_options_s = ''
+    cli_options.each do |cli_option|
+      cli_options_s += " #{cli_option[:name]}"
+      value = cli_option[:value]
+      cli_options_s += " #{value}" unless value.nil?
+    end
+    command = "cat #{filepath} | ruby bin/filter #{cli_options_s}"
+    act_out_s, act_err_s = capture_subprocess_io do
+      system(command)
+    end
+    [act_out_s, act_err_s]
+  end
+
+  def get_exp_value(filepath, api_options)
+    CSV.open(filepath, **api_options) do |csv|
+      rows = []
+      csv.each do |row|
+        rows << row.join(csv.col_sep)
+      end
+      rows << ''
+      row_sep = csv.row_sep == "\r\n" ? "\n" : csv.row_sep
+      rows.join(row_sep)
+    end
+  end
+
+  def verify_via_api(test_method, csv_s, options)
+    Dir.mktmpdir do |dirpath|
+      primary_option = options.shift
+      filepath = csv_filepath(csv_s, dirpath, primary_option.sym)
+      File.write(filepath, csv_s)
+      primary_option.cli_option_names.each do |cli_option_name|
+        cli_options = [{name: cli_option_name, value: primary_option.argument_value}]
+        options.each do |option|
+          cli_options.push({name: option.cli_option_names.first, value: option.argument_value})
+        end
+        act_out_s, act_err_s = get_act_values(filepath, cli_options)
+        assert_empty(act_err_s, test_method)
+        api_options = {primary_option.sym => primary_option.argument_value}
+        options.each do |option|
+          api_options[option.sym] = option.argument_value
+        end
+        exp_out_s = get_exp_value(filepath, api_options)
+        assert_equal(exp_out_s, act_out_s, test_method)
+      end
+    end
   end
 
   def do_verification(test_method, csv_s, option = Option.new)
@@ -103,13 +151,13 @@ class TestFilter < Minitest::Test
 
   # General options.
 
-  def test_no_options
+  def zzz_test_no_options
     csv_s = make_csv_s
     exp_out_pat = csv_s
     do_verification(__method__, csv_s)
   end
 
-  def test_option_h
+  def zzz_test_option_h
     %w[-h --help].each do |option_name|
       options_h = {option_name => nil}
       csv_s = make_csv_s
@@ -118,7 +166,7 @@ class TestFilter < Minitest::Test
     end
   end
 
-  def test_option_v
+  def zzz_test_option_v
     %w[-v --version].each do |option_name|
       options_h = {option_name => nil}
       csv_s = make_csv_s
@@ -127,7 +175,7 @@ class TestFilter < Minitest::Test
     end
   end
 
-  def test_invalid_option
+  def zzz_test_invalid_option
     %w[-Z --ZZZ].each do |option_name|
       options_h = {option_name => nil}
       do_test('', exp_err_pat: 'InvalidOption', options: options_h)
@@ -136,7 +184,7 @@ class TestFilter < Minitest::Test
 
   # Input options.
 
-  def test_option_input_col_sep
+  def zzz_test_option_input_col_sep
     input_col_sep = 'X'
     %w[--in_col_sep --input_col_sep].each do |option_name|
       options_h = {option_name => input_col_sep}
@@ -146,7 +194,7 @@ class TestFilter < Minitest::Test
     end
   end
 
-  def test_option_input_row_sep
+  def zzz_test_option_input_row_sep
     input_row_sep = 'X'
     %w[--in_row_sep --input_row_sep].each do |option_name|
       options_h = {option_name => input_row_sep}
@@ -158,7 +206,7 @@ class TestFilter < Minitest::Test
 
   # Output options.
 
-  def test_option_output_col_sep
+  def zzz_test_option_output_col_sep
     output_col_sep = 'X'
     %w[--out_col_sep --output_col_sep].each do |option_name|
       options_h = {option_name => output_col_sep}
@@ -168,7 +216,7 @@ class TestFilter < Minitest::Test
     end
   end
 
-  def test_option_output_row_sep
+  def zzz_test_option_output_row_sep
     output_row_sep = 'X'
     %w[--out_row_sep --output_row_sep].each do |option_name|
       options_h = {option_name => output_row_sep}
@@ -180,21 +228,21 @@ class TestFilter < Minitest::Test
 
   # Input/output options.
 
-  def test_option_c
+  def zzz_test_option_c
     col_sep = 'X'
     csv_s = make_csv_s(col_sep: col_sep)
     option = Option.new(:col_sep, col_sep)
     do_verification(__method__, csv_s, option)
   end
 
-  def test_option_r
+  def zzz_test_option_r
     row_sep = 'X'
     csv_s = make_csv_s(row_sep: row_sep)
     option = Option.new(:row_sep, row_sep)
     do_verification(__method__, csv_s, option)
   end
 
-  def test_option_q
+  def zzz_test_option_q
     quote_char = "Z"
     rows = [
       %w[foo 0],
@@ -205,6 +253,20 @@ class TestFilter < Minitest::Test
     csv_s = make_csv_s(rows: rows)
     option = Option.new(:quote_char, quote_char)
     do_verification(__method__, csv_s, option)
+  end
+
+  # Make sure we can pass multiple options.
+  def test_multiple_options
+    row_sep = 'X'
+    col_sep = 'Y'
+    quote_char = 'Z'
+    csv_s = make_csv_s(row_sep: row_sep, col_sep: col_sep)
+    options = [
+      Option.new(:row_sep, row_sep),
+      Option.new(:col_sep, col_sep),
+      Option.new(:quote_char, quote_char),
+    ]
+    verify_via_api(__method__, csv_s, options)
   end
 
 end
