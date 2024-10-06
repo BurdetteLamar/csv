@@ -228,21 +228,25 @@ class TestFilter < Minitest::Test
 
   # Input/output options.
 
-  def zzz_test_option_c
+  def test_option_c
     col_sep = 'X'
     csv_s = make_csv_s(col_sep: col_sep)
-    option = Option.new(:col_sep, col_sep)
-    do_verification(__method__, csv_s, option)
+    options = [
+      Option.new(:col_sep, col_sep)
+    ]
+    verify_via_api(__method__, csv_s, options)
   end
 
-  def zzz_test_option_r
+  def test_option_r
     row_sep = 'X'
     csv_s = make_csv_s(row_sep: row_sep)
-    option = Option.new(:row_sep, row_sep)
-    do_verification(__method__, csv_s, option)
+    options = [
+      Option.new(:row_sep, row_sep)
+    ]
+    verify_via_api(__method__, csv_s, options)
   end
 
-  def zzz_test_option_q
+  def test_option_q
     quote_char = "Z"
     rows = [
       %w[foo 0],
@@ -251,8 +255,10 @@ class TestFilter < Minitest::Test
       %w[ZbatZ, 2],
     ]
     csv_s = make_csv_s(rows: rows)
-    option = Option.new(:quote_char, quote_char)
-    do_verification(__method__, csv_s, option)
+    options = [
+      Option.new(:quote_char, quote_char)
+    ]
+    verify_via_api(__method__, csv_s, options)
   end
 
   # Make sure we can pass multiple options.
