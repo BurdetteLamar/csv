@@ -12,6 +12,7 @@ class TestFilter < Minitest::Test
     row_sep: %w[-r --row_sep],
     quote_char: %w[-q --quote_char],
     output_row_sep: %w[--output_row_sep --out_row_sep],
+    output_col_sep: %w[--output_col_sep --out_col_sep],
   }
 
   class Option
@@ -214,14 +215,14 @@ class TestFilter < Minitest::Test
 
   # Output options.
 
-  def zzz_test_option_output_col_sep
-    output_col_sep = 'X'
-    %w[--out_col_sep --output_col_sep].each do |option_name|
-      options_h = {option_name => output_col_sep}
-      csv_s = make_csv_s
-      exp_out_pat = make_csv_s(col_sep: output_col_sep)
-      do_test(csv_s, exp_out_pat: exp_out_pat, options: options_h)
-    end
+  def test_option_output_col_sep
+    col_sep = 'X'
+    output_col_sep = 'A'
+    csv_s = make_csv_s(col_sep: col_sep)
+    options = [
+      Option.new(:output_col_sep, output_col_sep)
+    ]
+    verify_via_api(__method__, csv_s, options)
   end
 
   def test_option_output_row_sep
