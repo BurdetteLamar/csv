@@ -79,24 +79,33 @@ class TestFilter < Minitest::Test
     return filtered_s
   end
 
-  def verify_via_api(test_method, csv_s, options)
+  def verify_via_api(test_method, csv_s, options = [])
     Dir.mktmpdir do |dirpath|
-      primary_option = options.shift
-      filepath = csv_filepath(csv_s, dirpath, primary_option.sym)
-      File.write(filepath, csv_s)
-      primary_option.cli_option_names.each do |cli_option_name|
-        cli_options = [{name: cli_option_name, value: primary_option.argument_value}]
-        options.each do |option|
-          cli_options.push({name: option.cli_option_names.first, value: option.argument_value})
-        end
-        act_out_s, act_err_s = get_act_values(filepath, cli_options)
+      if options.empty?
+        filepath = csv_filepath(csv_s, dirpath, :no_options)
+        File.write(filepath, csv_s)
+        act_out_s, act_err_s = get_act_values(filepath, {})
         assert_empty(act_err_s, test_method)
-        api_options = {primary_option.sym => primary_option.argument_value}
-        options.each do |option|
-          api_options[option.sym] = option.argument_value
-        end
-        exp_out_s = get_exp_value(filepath, api_options)
+        exp_out_s = get_exp_value(filepath, {})
         assert_equal(exp_out_s, act_out_s, test_method)
+      else
+        primary_option = options.shift
+        filepath = csv_filepath(csv_s, dirpath, primary_option.sym)
+        File.write(filepath, csv_s)
+        primary_option.cli_option_names.each do |cli_option_name|
+          cli_options = [{name: cli_option_name, value: primary_option.argument_value}]
+          options.each do |option|
+            cli_options.push({name: option.cli_option_names.first, value: option.argument_value})
+          end
+          act_out_s, act_err_s = get_act_values(filepath, cli_options)
+          assert_empty(act_err_s, test_method)
+          api_options = {primary_option.sym => primary_option.argument_value}
+          options.each do |option|
+            api_options[option.sym] = option.argument_value
+          end
+          exp_out_s = get_exp_value(filepath, api_options)
+          assert_equal(exp_out_s, act_out_s, test_method)
+        end
       end
     end
   end
@@ -150,10 +159,9 @@ class TestFilter < Minitest::Test
 
   # General options.
 
-  def zzz_test_no_options
+  def test_no_options
     csv_s = make_csv_s
-    exp_out_pat = csv_s
-    do_verification(__method__, csv_s)
+    verify_via_api(__method__, csv_s)
   end
 
   def zzz_test_option_h
