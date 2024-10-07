@@ -79,11 +79,22 @@ class TestFilter < Minitest::Test
     return filtered_s
   end
 
+  def verify_via_cli(test_method, option_name, exp_out_pat)
+    Dir.mktmpdir do |dirpath|
+      sym = option_name.to_sym
+      filepath = csv_filepath('', dirpath, sym)
+      command = "cat #{filepath} | ruby bin/filter #{option_name}"
+      act_out_s, act_err_s = capture_subprocess_io do
+        system(command)
+      end
+      assert_match(exp_out_pat, act_out_s, test_method)
+    end
+  end
+
   def verify_via_api(test_method, csv_s, options = [])
     Dir.mktmpdir do |dirpath|
       if options.empty?
         filepath = csv_filepath(csv_s, dirpath, :no_options)
-        File.write(filepath, csv_s)
         act_out_s, act_err_s = get_act_values(filepath, {})
         assert_empty(act_err_s, test_method)
         exp_out_s = get_exp_value(filepath, {})
@@ -91,7 +102,6 @@ class TestFilter < Minitest::Test
       else
         primary_option = options.shift
         filepath = csv_filepath(csv_s, dirpath, primary_option.sym)
-        File.write(filepath, csv_s)
         primary_option.cli_option_names.each do |cli_option_name|
           cli_options = [{name: cli_option_name, value: primary_option.argument_value}]
           options.each do |option|
@@ -110,53 +120,6 @@ class TestFilter < Minitest::Test
     end
   end
 
-  def do_verification(test_method, csv_s, option = Option.new)
-    Dir.mktmpdir do |dirpath|
-      filepath = csv_filepath(csv_s, dirpath, option.sym)
-      option.cli_option_names.each do |cli_option_name|
-        cli_option = cli_option(cli_option_name, option.argument_value)
-        # Make actual values.
-        command = "cat #{filepath} | ruby bin/filter #{cli_option}"
-        act_out_s, act_err_s = capture_subprocess_io do
-          system(command)
-        end
-        # Verify $stderr.
-        assert_empty(act_err_s, test_method)
-        # Make expected output.
-        open_options = {option.sym => option.argument_value}
-        exp_out_s = CSV.open(filepath, **open_options) do |csv|
-          rows = []
-          csv.each do |row|
-            rows << row.join(csv.col_sep)
-          end
-          rows << ''
-          row_sep = csv.row_sep == "\r\n" ? "\n" : csv.row_sep
-          rows.join(row_sep)
-        end
-        assert_equal(exp_out_s, act_out_s, test_method)
-      end
-    end
-  end
-
-  def do_test(csv_s, exp_out_pat: '', exp_err_pat: '', options: {})
-    options_s = ''
-    options.each_pair do |name, value|
-      option_s = name
-      option_s += " #{value}" unless value.nil?
-      options_s += ' ' + option_s
-    end
-    Dir.mktmpdir do |dirpath|
-      filepath = File.join(dirpath, 't.csv')
-      File.write(filepath, csv_s)
-      command = "cat #{filepath} | ruby bin/filter #{options_s}"
-      act_out_s, act_err_s = capture_subprocess_io do
-        system(command)
-      end
-      assert_match(exp_err_pat, act_err_s, caller[2])
-      assert_match(exp_out_pat, act_out_s, caller[2])
-    end
-  end
-
   # General options.
 
   def test_no_options
@@ -164,12 +127,10 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, csv_s)
   end
 
-  def zzz_test_option_h
+  def test_option_h
     %w[-h --help].each do |option_name|
-      options_h = {option_name => nil}
-      csv_s = make_csv_s
       exp_out_pat = /Usage/
-      do_test(csv_s, exp_out_pat: exp_out_pat, options: options_h)
+      verify_via_cli(__method__, option_name, exp_out_pat)
     end
   end
 
