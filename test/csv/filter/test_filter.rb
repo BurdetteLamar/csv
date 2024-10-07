@@ -191,14 +191,13 @@ class TestFilter < Minitest::Test
 
   # Input options.
 
-  def zzz_test_option_input_col_sep
+  def test_option_input_col_sep
     input_col_sep = 'X'
-    %w[--in_col_sep --input_col_sep].each do |option_name|
-      options_h = {option_name => input_col_sep}
-      csv_s = make_csv_s(col_sep: input_col_sep)
-      exp_out_pat = make_csv_s
-      do_test(csv_s, exp_out_pat: exp_out_pat, options: options_h)
-    end
+    csv_s = make_csv_s(row_sep: input_col_sep)
+    options = [
+      Option.new(:input_col_sep, input_col_sep)
+    ]
+    verify_via_api(__method__, csv_s, options)
   end
 
   def test_option_input_row_sep
@@ -212,22 +211,20 @@ class TestFilter < Minitest::Test
 
   # Output options.
 
-  def zzz_test_option_output_col_sep
-    col_sep = 'X'
-    output_col_sep = 'A'
-    csv_s = make_csv_s(col_sep: col_sep)
+  def test_option_output_col_sep
+    output_col_sep = 'X'
+    csv_s = make_csv_s(row_sep: output_col_sep)
     options = [
-      Option.new(:output_col_sep, output_col_sep)
+      Option.new(:input_col_sep, output_col_sep)
     ]
     verify_via_api(__method__, csv_s, options)
   end
 
-  def zzz_test_option_output_row_sep
-    row_sep = 'X'
+  def test_option_output_row_sep
     output_row_sep = 'A'
-    csv_s = make_csv_s(row_sep: row_sep)
+    csv_s = make_csv_s(row_sep: output_row_sep)
     options = [
-      Option.new(:output_row_sep, output_row_sep)
+      Option.new(:input_row_sep, output_row_sep)
     ]
     verify_via_api(__method__, csv_s, options)
   end
