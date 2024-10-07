@@ -79,7 +79,7 @@ class TestFilter < Minitest::Test
     return filtered_s
   end
 
-  def verify_via_cli(test_method, option_name, exp_out_pat)
+  def verify_via_cli(test_method, option_name, exp_out_pat: '', exp_err_pat: '')
     Dir.mktmpdir do |dirpath|
       sym = option_name.to_sym
       filepath = csv_filepath('', dirpath, sym)
@@ -88,6 +88,7 @@ class TestFilter < Minitest::Test
         system(command)
       end
       assert_match(exp_out_pat, act_out_s, test_method)
+      assert_match(exp_err_pat, act_err_s, test_method)
     end
   end
 
@@ -129,24 +130,19 @@ class TestFilter < Minitest::Test
 
   def test_option_h
     %w[-h --help].each do |option_name|
-      exp_out_pat = /Usage/
-      verify_via_cli(__method__, option_name, exp_out_pat)
+      verify_via_cli(__method__, option_name, exp_out_pat: /Usage/)
     end
   end
 
-  def zzz_test_option_v
+  def test_option_v
     %w[-v --version].each do |option_name|
-      options_h = {option_name => nil}
-      csv_s = make_csv_s
-      exp_out_pat = /\d+\.\d+\.\d+/
-      do_test(csv_s, exp_out_pat: exp_out_pat, options: options_h)
+      verify_via_cli(__method__, option_name, exp_out_pat: /\d+\.\d+\.\d+/)
     end
   end
 
-  def zzz_test_invalid_option
+  def test_invalid_option
     %w[-Z --ZZZ].each do |option_name|
-      options_h = {option_name => nil}
-      do_test('', exp_err_pat: 'InvalidOption', options: options_h)
+      verify_via_cli(__method__, option_name, exp_err_pat: /OptionParser::InvalidOption/)
     end
   end
 
