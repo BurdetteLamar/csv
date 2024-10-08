@@ -11,7 +11,7 @@ def parse_converters(s)
   s.split(',').each do |name|
     name.sub(/^:/, '')
     sym = name.to_sym
-    converters.push(name)
+    converters.push(sym)
   end
   converters
 end

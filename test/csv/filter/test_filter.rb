@@ -8,6 +8,8 @@ require 'tempfile'
 class TestFilter < Minitest::Test
 
   CliOptionNames = {
+    # Input options.
+    converters: %w[--converters],
     col_sep: %w[-c --col_sep],
     row_sep: %w[-r --row_sep],
     quote_char: %w[-q --quote_char],
@@ -19,12 +21,21 @@ class TestFilter < Minitest::Test
 
   class Option
 
-    attr_accessor :sym, :cli_option_names, :argument_value
+    attr_accessor :sym, :cli_option_names, :api_argument_value, :cli_argument_value
 
-    def initialize(sym = nil, argument_value = nil)
+    def initialize(sym = nil, api_argument_value = nil)
       self.sym = sym || :nil
-      self.argument_value = argument_value
       self.cli_option_names = CliOptionNames[self.sym]
+      self.api_argument_value = api_argument_value
+      if api_argument_value.kind_of?(Array)
+        cli_argument_a = []
+        api_argument_value.each do |ele|
+          cli_argument_a.push(ele.to_s)
+        end
+        self.cli_argument_value = cli_argument_a.join(',')
+      else
+        self.cli_argument_value = api_argument_value
+      end
     end
 
   end
@@ -104,15 +115,15 @@ class TestFilter < Minitest::Test
         primary_option = options.shift
         filepath = csv_filepath(csv_s, dirpath, primary_option.sym)
         primary_option.cli_option_names.each do |cli_option_name|
-          cli_options = [{name: cli_option_name, value: primary_option.argument_value}]
+          cli_options = [{name: cli_option_name, value: primary_option.cli_argument_value}]
           options.each do |option|
-            cli_options.push({name: option.cli_option_names.first, value: option.argument_value})
+            cli_options.push({name: option.cli_option_names.first, value: option.cli_argument_value})
           end
           act_out_s, act_err_s = get_act_values(filepath, cli_options)
           assert_empty(act_err_s, test_method)
-          api_options = {primary_option.sym => primary_option.argument_value}
+          api_options = {primary_option.sym => primary_option.api_argument_value}
           options.each do |option|
-            api_options[option.sym] = option.argument_value
+            api_options[option.sym] = option.api_argument_value
           end
           exp_out_s = get_exp_value(filepath, api_options)
           assert_equal(exp_out_s, act_out_s, test_method)
@@ -147,6 +158,19 @@ class TestFilter < Minitest::Test
   end
 
   # Input options.
+
+  def test_option_converters
+    converters = %i[integer float]
+    rows = [
+      ['foo', 0],
+      ['bar', 1.1],
+    ]
+    csv_s = make_csv_s(rows: rows)
+    options = [
+      Option.new(:converters, converters)
+    ]
+    verify_via_api(__method__, csv_s, options)
+  end
 
   def test_option_input_col_sep
     input_col_sep = 'X'
