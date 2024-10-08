@@ -106,9 +106,9 @@ EOF
        'Attempt to parse non-conformant input.') do
     options[:liberal_parsing] = true
   end
-  p.on('--max_field_size N',
+  p.on('--field_size_limit N',
        'Maximum field size (characters)') do |value|
-    options[:max_field_size] = value.to_i
+    options[:field_size_limit] = value.to_i
   end
   p.on('--nil_value STR',
        'Value to be substituted for nil input field.') do |value|
