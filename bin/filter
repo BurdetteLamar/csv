@@ -108,7 +108,7 @@ EOF
   end
   p.on('--max_field_size N',
        'Maximum field size (characters)') do |value|
-    options[:max_field_size] = value
+    options[:max_field_size] = value.to_i
   end
   p.on('--nil_value STR',
        'Value to be substituted for nil input field.') do |value|

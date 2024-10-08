@@ -10,13 +10,16 @@ class TestFilter < Minitest::Test
   CliOptionNames = {
     # Input options.
     converters: %w[--converters],
+    max_field_size: %w[--max_field_size],
+    input_row_sep: %w[--input_row_sep --in_row_sep],
+    input_col_sep: %w[--input_col_sep --in_col_sep],
+    # Output options.
+    output_row_sep: %w[--output_row_sep --out_row_sep],
+    output_col_sep: %w[--output_col_sep --out_col_sep],
+    # Input/output options.
     col_sep: %w[-c --col_sep],
     row_sep: %w[-r --row_sep],
     quote_char: %w[-q --quote_char],
-    input_row_sep: %w[--input_row_sep --in_row_sep],
-    input_col_sep: %w[--input_col_sep --in_col_sep],
-    output_row_sep: %w[--output_row_sep --out_row_sep],
-    output_col_sep: %w[--output_col_sep --out_col_sep],
   }
 
   class Option
@@ -168,6 +171,15 @@ class TestFilter < Minitest::Test
     csv_s = make_csv_s(rows: rows)
     options = [
       Option.new(:converters, converters)
+    ]
+    verify_via_api(__method__, csv_s, options)
+  end
+
+  def test_max_field_size
+    max_field_size = 20
+    csv_s = make_csv_s
+    options = [
+      Option.new(:max_field_size, max_field_size)
     ]
     verify_via_api(__method__, csv_s, options)
   end
