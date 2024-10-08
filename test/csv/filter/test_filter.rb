@@ -13,6 +13,7 @@ class TestFilter < Minitest::Test
     field_size_limit: %w[--field_size_limit],
     input_row_sep: %w[--input_row_sep --in_row_sep],
     input_col_sep: %w[--input_col_sep --in_col_sep],
+    unconverted_fields: %w[--unconverted_fields],
     # Output options.
     output_row_sep: %w[--output_row_sep --out_row_sep],
     output_col_sep: %w[--output_col_sep --out_col_sep],
@@ -198,6 +199,15 @@ class TestFilter < Minitest::Test
     csv_s = make_csv_s(row_sep: input_row_sep)
     options = [
       Option.new(:input_row_sep, input_row_sep)
+    ]
+    verify_via_api(__method__, csv_s, options)
+  end
+
+  def test_option_unconverted_fields
+    unconverted_fields = nil
+    csv_s = make_csv_s
+    options = [
+      Option.new(:unconverted_fields, unconverted_fields)
     ]
     verify_via_api(__method__, csv_s, options)
   end
