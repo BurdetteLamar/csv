@@ -94,7 +94,7 @@ EOF
   end
   p.on('--headers',
        'Treat the first input row as headers.') do
-    options[:headers] = true
+    options[:headers] = nil
   end
   p.on('--header_converters STR',
        'Input header converters;',

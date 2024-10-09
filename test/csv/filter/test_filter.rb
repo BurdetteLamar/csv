@@ -11,6 +11,7 @@ class TestFilter < Minitest::Test
     # Input options.
     converters: %w[--converters],
     field_size_limit: %w[--field_size_limit],
+    headers: %w[--headers],
     input_row_sep: %w[--input_row_sep --in_row_sep],
     input_col_sep: %w[--input_col_sep --in_col_sep],
     unconverted_fields: %w[--unconverted_fields],
@@ -119,17 +120,19 @@ class TestFilter < Minitest::Test
         primary_option = options.shift
         filepath = csv_filepath(csv_s, dirpath, primary_option.sym)
         primary_option.cli_option_names.each do |cli_option_name|
+          # Get expected output string (from API).
+          api_options = {primary_option.sym => primary_option.api_argument_value}
+          options.each do |option|
+            api_options[option.sym] = option.api_argument_value
+          end
+          exp_out_s = get_exp_value(filepath, api_options)
+          # Get actual output and error strings (from CLI).
           cli_options = [{name: cli_option_name, value: primary_option.cli_argument_value}]
           options.each do |option|
             cli_options.push({name: option.cli_option_names.first, value: option.cli_argument_value})
           end
           act_out_s, act_err_s = get_act_values(filepath, cli_options)
           assert_empty(act_err_s, test_method)
-          api_options = {primary_option.sym => primary_option.api_argument_value}
-          options.each do |option|
-            api_options[option.sym] = option.api_argument_value
-          end
-          exp_out_s = get_exp_value(filepath, api_options)
           assert_equal(exp_out_s, act_out_s, test_method)
         end
       end
@@ -176,11 +179,20 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, csv_s, options)
   end
 
-  def test_field_size_limit
+  def test_option_field_size_limit
     field_size_limit = 20
     csv_s = make_csv_s
     options = [
       Option.new(:field_size_limit, field_size_limit)
+    ]
+    verify_via_api(__method__, csv_s, options)
+  end
+
+  def test_option_headers
+    headers = nil
+    csv_s = make_csv_s
+    options = [
+      Option.new(:headers, headers)
     ]
     verify_via_api(__method__, csv_s, options)
   end
