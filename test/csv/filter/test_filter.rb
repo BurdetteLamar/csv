@@ -119,15 +119,18 @@ class TestFilter < Minitest::Test
   def verify_via_api(test_method, csv_s, options = [])
     Dir.mktmpdir do |dirpath|
       if options.empty?
+        # Make expected output string (via API).
+        exp_out_s = ''
+        CSV.filter(csv_s, exp_out_s) do |row|
+        end
+        # Make actual output and error strings (via CLI).
         filepath = csv_filepath(csv_s, dirpath, :no_options)
         command = "cat #{filepath} | ruby bin/filter"
         act_out_s, act_err_s = capture_subprocess_io do
           system(command)
         end
+        # Verify.
         assert_empty(act_err_s, test_method)
-        exp_out_s = ''
-        CSV.filter(csv_s, exp_out_s) do |row|
-        end
         assert_equal(exp_out_s, act_out_s, test_method)
       else
         primary_option = options.shift
