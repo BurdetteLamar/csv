@@ -87,7 +87,11 @@ class TestFilter < Minitest::Test
     [act_out_s, act_err_s]
   end
 
-  def get_exp_value(filepath, api_options)
+  def get_exp_value(filepath, primary_option, options)
+    api_options = {primary_option.sym => primary_option.api_argument_value}
+    options.each do |option|
+      api_options[option.sym] = option.api_argument_value
+    end
     csv_s = File.read(filepath)
     filtered_s = ''
     CSV.filter(csv_s, filtered_s, **api_options) do |row|
@@ -114,18 +118,17 @@ class TestFilter < Minitest::Test
         filepath = csv_filepath(csv_s, dirpath, :no_options)
         act_out_s, act_err_s = get_act_values(filepath, {})
         assert_empty(act_err_s, test_method)
-        exp_out_s = get_exp_value(filepath, {})
+        csv_s = File.read(filepath)
+        exp_out_s = ''
+        CSV.filter(csv_s, exp_out_s) do |row|
+        end
         assert_equal(exp_out_s, act_out_s, test_method)
       else
         primary_option = options.shift
         filepath = csv_filepath(csv_s, dirpath, primary_option.sym)
         primary_option.cli_option_names.each do |cli_option_name|
           # Get expected output string (from API).
-          api_options = {primary_option.sym => primary_option.api_argument_value}
-          options.each do |option|
-            api_options[option.sym] = option.api_argument_value
-          end
-          exp_out_s = get_exp_value(filepath, api_options)
+          exp_out_s = get_exp_value(filepath, primary_option, options)
           # Get actual output and error strings (from CLI).
           cli_options = [{name: cli_option_name, value: primary_option.cli_argument_value}]
           options.each do |option|
