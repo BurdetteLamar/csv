@@ -73,7 +73,11 @@ class TestFilter < Minitest::Test
     filepath
   end
 
-  def get_act_values(filepath, cli_options)
+  def get_act_values(filepath, cli_option_name, primary_option, options)
+    cli_options = [{name: cli_option_name, value: primary_option.cli_argument_value}]
+    options.each do |option|
+      cli_options.push({name: option.cli_option_names.first, value: option.cli_argument_value})
+    end
     cli_options_s = ''
     cli_options.each do |cli_option|
       cli_options_s += " #{cli_option[:name]}"
@@ -116,7 +120,10 @@ class TestFilter < Minitest::Test
     Dir.mktmpdir do |dirpath|
       if options.empty?
         filepath = csv_filepath(csv_s, dirpath, :no_options)
-        act_out_s, act_err_s = get_act_values(filepath, {})
+        command = "cat #{filepath} | ruby bin/filter"
+        act_out_s, act_err_s = capture_subprocess_io do
+          system(command)
+        end
         assert_empty(act_err_s, test_method)
         csv_s = File.read(filepath)
         exp_out_s = ''
@@ -130,11 +137,7 @@ class TestFilter < Minitest::Test
           # Get expected output string (from API).
           exp_out_s = get_exp_value(filepath, primary_option, options)
           # Get actual output and error strings (from CLI).
-          cli_options = [{name: cli_option_name, value: primary_option.cli_argument_value}]
-          options.each do |option|
-            cli_options.push({name: option.cli_option_names.first, value: option.cli_argument_value})
-          end
-          act_out_s, act_err_s = get_act_values(filepath, cli_options)
+          act_out_s, act_err_s = get_act_values(filepath, cli_option_name, primary_option, options)
           assert_empty(act_err_s, test_method)
           assert_equal(exp_out_s, act_out_s, test_method)
         end
