@@ -125,7 +125,6 @@ class TestFilter < Minitest::Test
           system(command)
         end
         assert_empty(act_err_s, test_method)
-        csv_s = File.read(filepath)
         exp_out_s = ''
         CSV.filter(csv_s, exp_out_s) do |row|
         end
