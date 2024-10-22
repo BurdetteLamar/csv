@@ -94,8 +94,7 @@ class TestFilter < Minitest::Test
       value = cli_option[:value]
       cli_options_s += " #{Shellwords.escape(value)}" unless value.nil?
     end
-    act_out_s, act_err_s = execute_in_cli(filepath, cli_options_s)
-    [act_out_s, act_err_s]
+    execute_in_cli(filepath, cli_options_s)
   end
 
   def get_exp_value(filepath, primary_option, options)
