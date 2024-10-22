@@ -299,6 +299,15 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, csv_s, options.reverse)
   end
 
+  def test_option_r
+    row_sep = 'X'
+    csv_s = make_csv_s(row_sep: row_sep)
+    options = [
+      Option.new(:row_sep, row_sep)
+    ]
+    verify_via_api(__method__, csv_s, options)
+  end
+
   def test_option_input_row_sep
     input_row_sep = 'A'
     csv_s = make_csv_s(row_sep: input_row_sep)
@@ -317,13 +326,40 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, csv_s, options)
   end
 
-  def test_option_r
-    row_sep = 'X'
-    csv_s = make_csv_s(row_sep: row_sep)
+  def test_options_r_and_input_row_sep
+    input_row_sep = 'X'
+    row_sep = 'Y'
+    csv_s = make_csv_s(row_sep: input_row_sep)
     options = [
-      Option.new(:row_sep, row_sep)
+      Option.new(:input_row_sep, input_row_sep),
+      Option.new(:row_sep, row_sep),
     ]
     verify_via_api(__method__, csv_s, options)
+    verify_via_api(__method__, csv_s, options.reverse)
+  end
+
+  def test_options_r_and_output_row_sep
+    row_sep = 'X'
+    output_row_sep = 'Y'
+    csv_s = make_csv_s(row_sep: row_sep)
+    options = [
+      Option.new(:output_row_sep, output_row_sep),
+      Option.new(:row_sep, row_sep),
+    ]
+    verify_via_api(__method__, csv_s, options)
+    verify_via_api(__method__, csv_s, options.reverse)
+  end
+
+  def test_options_input_row_sep_and_output_row_sep
+    input_row_sep = 'X'
+    output_row_sep = 'Y'
+    csv_s = make_csv_s(row_sep: input_row_sep)
+    options = [
+      Option.new(:input_row_sep, input_row_sep),
+      Option.new(:output_row_sep, output_row_sep),
+    ]
+    verify_via_api(__method__, csv_s, options)
+    verify_via_api(__method__, csv_s, options.reverse)
   end
 
   def test_option_q
