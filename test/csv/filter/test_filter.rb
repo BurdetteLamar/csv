@@ -69,10 +69,10 @@ class TestFilter < Minitest::Test
     s += " #{value}" unless value.nil?
   end
 
-  def csv_filepath(csv_s, dirpath, option_sym)
+  def csv_filepath(act_in_s, dirpath, option_sym)
     filename = "#{option_sym}.csv"
     filepath = File.join(dirpath, filename)
-    File.write(filepath, csv_s)
+    File.write(filepath, act_in_s)
     filepath
   end
 
@@ -156,8 +156,8 @@ class TestFilter < Minitest::Test
   # General options.
 
   def test_no_options
-    csv_s = make_csv_s
-    verify_via_api(__method__, csv_s)
+    act_in_s = make_csv_s
+    verify_via_api(__method__, act_in_s)
   end
 
   def test_option_h
@@ -186,29 +186,29 @@ class TestFilter < Minitest::Test
       ['foo', 0],
       ['bar', 1.1],
     ]
-    csv_s = make_csv_s(rows: rows)
+    act_in_s = make_csv_s(rows: rows)
     options = [
       Option.new(:converters, converters)
     ]
-    verify_via_api(__method__, csv_s, options)
+    verify_via_api(__method__, act_in_s, options)
   end
 
   def test_option_field_size_limit
     field_size_limit = 20
-    csv_s = make_csv_s
+    act_in_s = make_csv_s
     options = [
       Option.new(:field_size_limit, field_size_limit)
     ]
-    verify_via_api(__method__, csv_s, options)
+    verify_via_api(__method__, act_in_s, options)
   end
 
   def test_option_headers
     headers = nil
-    csv_s = make_csv_s
+    act_in_s = make_csv_s
     options = [
       Option.new(:headers, headers)
     ]
-    verify_via_api(__method__, csv_s, options)
+    verify_via_api(__method__, act_in_s, options)
   end
 
   def test_option_header_converters
@@ -217,149 +217,149 @@ class TestFilter < Minitest::Test
       ['Foo', 'Bar'],
       ['0', 1],
     ]
-    csv_s = make_csv_s(rows: rows)
+    act_in_s = make_csv_s(rows: rows)
     options = [
       Option.new(:headers, nil),
       Option.new(:header_converters, header_converters)
     ]
-    verify_via_api(__method__, csv_s, options)
+    verify_via_api(__method__, act_in_s, options)
   end
 
   def test_option_unconverted_fields
     unconverted_fields = nil
-    csv_s = make_csv_s
+    act_in_s = make_csv_s
     options = [
       Option.new(:unconverted_fields, unconverted_fields)
     ]
-    verify_via_api(__method__, csv_s, options)
+    verify_via_api(__method__, act_in_s, options)
   end
 
   # Input/output options.
 
   def test_option_c
     col_sep = 'X'
-    csv_s = make_csv_s(col_sep: col_sep)
+    act_in_s = make_csv_s(col_sep: col_sep)
     options = [
       Option.new(:col_sep, col_sep)
     ]
-    verify_via_api(__method__, csv_s, options)
+    verify_via_api(__method__, act_in_s, options)
   end
 
   def test_option_input_col_sep
     input_col_sep = 'X'
-    csv_s = make_csv_s(row_sep: input_col_sep)
+    act_in_s = make_csv_s(row_sep: input_col_sep)
     options = [
       Option.new(:input_col_sep, input_col_sep)
     ]
-    verify_via_api(__method__, csv_s, options)
+    verify_via_api(__method__, act_in_s, options)
   end
 
   def test_option_output_col_sep
     output_col_sep = 'X'
-    csv_s = make_csv_s(row_sep: output_col_sep)
+    act_in_s = make_csv_s(row_sep: output_col_sep)
     options = [
       Option.new(:input_col_sep, output_col_sep)
     ]
-    verify_via_api(__method__, csv_s, options)
+    verify_via_api(__method__, act_in_s, options)
   end
 
   def test_options_c_and_input_col_sep
     input_col_sep = 'X'
     col_sep = 'Y'
-    csv_s = make_csv_s(col_sep: input_col_sep)
+    act_in_s = make_csv_s(col_sep: input_col_sep)
     options = [
       Option.new(:input_col_sep, input_col_sep),
       Option.new(:col_sep, col_sep),
     ]
-    verify_via_api(__method__, csv_s, options)
-    verify_via_api(__method__, csv_s, options.reverse)
+    verify_via_api(__method__, act_in_s, options)
+    verify_via_api(__method__, act_in_s, options.reverse)
   end
 
   def test_options_c_and_output_col_sep
     col_sep = 'X'
     output_col_sep = 'Y'
-    csv_s = make_csv_s(col_sep: col_sep)
+    act_in_s = make_csv_s(col_sep: col_sep)
     options = [
       Option.new(:output_col_sep, output_col_sep),
       Option.new(:col_sep, col_sep),
     ]
-    verify_via_api(__method__, csv_s, options)
-    verify_via_api(__method__, csv_s, options.reverse)
+    verify_via_api(__method__, act_in_s, options)
+    verify_via_api(__method__, act_in_s, options.reverse)
   end
 
   def test_options_input_col_sep_and_output_col_sep
     input_col_sep = 'X'
     output_col_sep = 'Y'
-    csv_s = make_csv_s(col_sep: input_col_sep)
+    act_in_s = make_csv_s(col_sep: input_col_sep)
     options = [
       Option.new(:input_col_sep, input_col_sep),
       Option.new(:output_col_sep, output_col_sep),
     ]
-    verify_via_api(__method__, csv_s, options)
-    verify_via_api(__method__, csv_s, options.reverse)
+    verify_via_api(__method__, act_in_s, options)
+    verify_via_api(__method__, act_in_s, options.reverse)
   end
 
   def test_option_r
     row_sep = 'X'
-    csv_s = make_csv_s(row_sep: row_sep)
+    act_in_s = make_csv_s(row_sep: row_sep)
     options = [
       Option.new(:row_sep, row_sep)
     ]
-    verify_via_api(__method__, csv_s, options)
+    verify_via_api(__method__, act_in_s, options)
   end
 
   def test_option_input_row_sep
     input_row_sep = 'A'
-    csv_s = make_csv_s(row_sep: input_row_sep)
+    act_in_s = make_csv_s(row_sep: input_row_sep)
     options = [
       Option.new(:input_row_sep, input_row_sep)
     ]
-    verify_via_api(__method__, csv_s, options)
+    verify_via_api(__method__, act_in_s, options)
   end
 
   def test_option_output_row_sep
     output_row_sep = 'A'
-    csv_s = make_csv_s(row_sep: output_row_sep)
+    act_in_s = make_csv_s(row_sep: output_row_sep)
     options = [
       Option.new(:input_row_sep, output_row_sep)
     ]
-    verify_via_api(__method__, csv_s, options)
+    verify_via_api(__method__, act_in_s, options)
   end
 
   def test_options_r_and_input_row_sep
     input_row_sep = 'X'
     row_sep = 'Y'
-    csv_s = make_csv_s(row_sep: input_row_sep)
+    act_in_s = make_csv_s(row_sep: input_row_sep)
     options = [
       Option.new(:input_row_sep, input_row_sep),
       Option.new(:row_sep, row_sep),
     ]
-    verify_via_api(__method__, csv_s, options)
-    verify_via_api(__method__, csv_s, options.reverse)
+    verify_via_api(__method__, act_in_s, options)
+    verify_via_api(__method__, act_in_s, options.reverse)
   end
 
   def test_options_r_and_output_row_sep
     row_sep = 'X'
     output_row_sep = 'Y'
-    csv_s = make_csv_s(row_sep: row_sep)
+    act_in_s = make_csv_s(row_sep: row_sep)
     options = [
       Option.new(:output_row_sep, output_row_sep),
       Option.new(:row_sep, row_sep),
     ]
-    verify_via_api(__method__, csv_s, options)
-    verify_via_api(__method__, csv_s, options.reverse)
+    verify_via_api(__method__, act_in_s, options)
+    verify_via_api(__method__, act_in_s, options.reverse)
   end
 
   def test_options_input_row_sep_and_output_row_sep
     input_row_sep = 'X'
     output_row_sep = 'Y'
-    csv_s = make_csv_s(row_sep: input_row_sep)
+    act_in_s = make_csv_s(row_sep: input_row_sep)
     options = [
       Option.new(:input_row_sep, input_row_sep),
       Option.new(:output_row_sep, output_row_sep),
     ]
-    verify_via_api(__method__, csv_s, options)
-    verify_via_api(__method__, csv_s, options.reverse)
+    verify_via_api(__method__, act_in_s, options)
+    verify_via_api(__method__, act_in_s, options.reverse)
   end
 
   def test_option_q
@@ -369,11 +369,11 @@ class TestFilter < Minitest::Test
       ["ZbarZ", 1],
       ['"baz"', 2],
     ]
-    csv_s = make_csv_s(rows: rows)
+    act_in_s = make_csv_s(rows: rows)
     options = [
       Option.new(:quote_char, quote_char)
     ]
-    verify_via_api(__method__, csv_s, options)
+    verify_via_api(__method__, act_in_s, options)
   end
 
   # Make sure we can pass multiple options.
