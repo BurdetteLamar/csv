@@ -250,13 +250,14 @@ class TestFilter < Minitest::Test
     assert_equal(act_in_s, act_out_s)
   end
 
-  def zzz_test_option_input_col_sep
+  def test_option_input_col_sep
     input_col_sep = 'X'
     act_in_s = make_csv_s(row_sep: input_col_sep)
     options = [
       Option.new(:input_col_sep, input_col_sep)
     ]
-    verify_via_api(__method__, act_in_s, options)
+    act_out_s = verify_cli(__method__, act_in_s, options)
+    refute_equal(act_in_s, act_out_s)
   end
 
   def zzz_test_option_output_col_sep
@@ -281,9 +282,7 @@ class TestFilter < Minitest::Test
     assert_equal(act_in_s, act_out_s)
     # input_col_sep overrides col_sep.
     act_out_s = verify_cli(__method__, act_in_s, options.reverse)
-    act_in_a = act_in_s.split(input_col_sep)
-    act_out_a = act_out_s.split(col_sep)
-    assert_equal(act_in_a, act_out_a)
+    refute_equal(act_in_s, act_out_s)
   end
 
   def test_options_c_and_output_col_sep
@@ -294,8 +293,12 @@ class TestFilter < Minitest::Test
       Option.new(:output_col_sep, output_col_sep),
       Option.new(:col_sep, col_sep),
     ]
-    verify_cli(__method__, act_in_s, options)
-    verify_cli(__method__, act_in_s, options.reverse)
+    # col_sep overrides output_col_sep.
+    act_out_s = verify_cli(__method__, act_in_s, options)
+    assert_equal(act_in_s, act_out_s)
+    # output_col_sep overrides col_sep.
+    act_out_s = verify_cli(__method__, act_in_s, options.reverse)
+    refute_equal(act_in_s, act_out_s)
   end
 
   def test_options_input_col_sep_and_output_col_sep
@@ -306,8 +309,10 @@ class TestFilter < Minitest::Test
       Option.new(:input_col_sep, input_col_sep),
       Option.new(:output_col_sep, output_col_sep),
     ]
-    verify_cli(__method__, act_in_s, options)
-    verify_cli(__method__, act_in_s, options.reverse)
+    act_out_s = verify_cli(__method__, act_in_s, options)
+    refute_equal(act_in_s, act_out_s)
+    act_out_s = verify_cli(__method__, act_in_s, options.reverse)
+    refute_equal(act_in_s, act_out_s)
   end
 
   def test_option_r
