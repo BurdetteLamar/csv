@@ -83,7 +83,7 @@ class TestFilter < Minitest::Test
     end
   end
 
-  def zzz_get_act_values(filepath, cli_option_name, primary_option, options)
+  def get_act_values(filepath, cli_option_name, primary_option, options)
     cli_options = [{name: cli_option_name, value: primary_option.cli_argument_value}]
     options.each do |option|
       cli_options.push({name: option.cli_option_names.first, value: option.cli_argument_value})
@@ -97,7 +97,7 @@ class TestFilter < Minitest::Test
     execute_in_cli(filepath, cli_options_s)
   end
 
-  def zzz_get_exp_value(filepath, primary_option, options)
+  def get_exp_value(filepath, primary_option, options)
     api_options = {primary_option.sym => primary_option.api_argument_value}
     options.each do |option|
       api_options[option.sym] = option.api_argument_value
@@ -119,39 +119,30 @@ class TestFilter < Minitest::Test
     [act_out_s, act_err_s]
   end
 
+  # Get and return the actual output from the API.
   def get_via_api(act_in_s, **api_options)
     act_out_s = ''
     CSV.filter(act_in_s, act_out_s, **api_options) {|row| }
     act_out_s
   end
 
-  def zzz_verify_via_api(test_method, act_in_s, options = [])
+  # Verify that the CLI behaves the same as the API.
+  # Return the actual output.
+  def verify_cli(test_method, act_in_s, options)
+    act_out_s = ''
     Dir.mktmpdir do |dirpath|
-      if options.empty?
-        # Get expected output string (via API).
-        exp_out_s = get_via_api(act_in_s)
-        # Get actual output and error strings (via CLI).
-        filepath = csv_filepath(act_in_s, dirpath, :no_options)
-        act_out_s, act_err_s = execute_in_cli(filepath)
-        # Verify.
-        assert_all(test_method, exp_out_s, act_out_s, act_err_s)
-      else
-        primary_option = options.shift
-        filepath = csv_filepath(act_in_s, dirpath, primary_option.sym)
-        primary_option.cli_option_names.each do |cli_option_name|
-          # Get expected output string (from API).
-          exp_out_s = get_exp_value(filepath, primary_option, options)
-          # Get actual output and error strings (from CLI).
-          act_out_s, act_err_s = get_act_values(filepath, cli_option_name, primary_option, options)
-          assert_all(test_method, exp_out_s, act_out_s, act_err_s)
-        end
+      primary_option = options.shift
+      filepath = csv_filepath(act_in_s, dirpath, primary_option.sym)
+      primary_option.cli_option_names.each do |cli_option_name|
+        # Get expected output string (from API).
+        exp_out_s = get_exp_value(filepath, primary_option, options)
+        # Get actual output and error strings (from CLI).
+        act_out_s, act_err_s = get_act_values(filepath, cli_option_name, primary_option, options)
+        assert_empty(act_err_s, test_method)
+        assert_equal(exp_out_s.strip, act_out_s.strip, test_method)
       end
     end
-  end
-
-  def zzz_assert_all(test_method, exp_out_s, act_out_s, act_err_s)
-    assert_empty(act_err_s, test_method)
-    assert_equal(exp_out_s.strip, act_out_s.strip, test_method)
+    act_out_s
   end
 
   # Invalid option.
@@ -248,13 +239,14 @@ class TestFilter < Minitest::Test
 
   # Input/output options.
 
-  def zzz_test_option_c
+  def test_option_c
     col_sep = 'X'
     act_in_s = make_csv_s(col_sep: col_sep)
     options = [
       Option.new(:col_sep, col_sep)
     ]
-    verify_via_api(__method__, act_in_s, options)
+    act_out_s = verify_cli(__method__, act_in_s, options)
+    assert_equal(act_in_s, act_out_s)
   end
 
   def zzz_test_option_input_col_sep
