@@ -326,25 +326,27 @@ class TestFilter < Minitest::Test
     assert_equal(act_in_s, act_out_s)
   end
 
-  def zzz_test_option_input_row_sep
+  def test_option_input_row_sep
     input_row_sep = 'A'
     act_in_s = make_csv_s(row_sep: input_row_sep)
     options = [
       Option.new(:input_row_sep, input_row_sep)
     ]
-    verify_via_api(__method__, act_in_s, options)
+    act_out_s = verify_cli(__method__, act_in_s, options)
+    refute_equal(act_in_s, act_out_s)
   end
 
-  def zzz_test_option_output_row_sep
+  def test_option_output_row_sep
     output_row_sep = 'A'
     act_in_s = make_csv_s(row_sep: output_row_sep)
     options = [
       Option.new(:input_row_sep, output_row_sep)
     ]
-    verify_via_api(__method__, act_in_s, options)
+    act_out_s = verify_cli(__method__, act_in_s, options)
+    refute_equal(act_in_s, act_out_s)
   end
 
-  def zzz_test_options_r_and_input_row_sep
+  def test_options_r_and_input_row_sep
     input_row_sep = 'X'
     row_sep = 'Y'
     act_in_s = make_csv_s(row_sep: input_row_sep)
@@ -352,8 +354,12 @@ class TestFilter < Minitest::Test
       Option.new(:input_row_sep, input_row_sep),
       Option.new(:row_sep, row_sep),
     ]
-    verify_via_api(__method__, act_in_s, options)
-    verify_via_api(__method__, act_in_s, options.reverse)
+    # row_sep overrides input_row_sep.
+    act_out_s = verify_cli(__method__, act_in_s, options)
+    refute_equal(act_in_s, act_out_s)
+    # input_row_sep overrides row_sep.
+    act_out_s = verify_cli(__method__, act_in_s, options.reverse)
+    refute_equal(act_in_s, act_out_s)
   end
 
   def zzz_test_options_r_and_output_row_sep
