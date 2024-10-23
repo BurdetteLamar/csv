@@ -65,11 +65,6 @@ class TestFilter < Minitest::Test
     end
   end
 
-  def zzz_cli_option_s(name, value)
-    s = name
-    s += " #{value}" unless value.nil?
-  end
-
   # Return filepath of file containing CSV data.
   def csv_filepath(act_in_s, dirpath, option_sym)
     filename = "#{option_sym}.csv"
