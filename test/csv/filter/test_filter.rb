@@ -86,8 +86,8 @@ class TestFilter < Minitest::Test
     end
   end
 
-  # Return CLI result.
-  def cli_result(filepath, cli_option_name, primary_option, options)
+  # Return CLI results for options.
+  def cli_results_for_options(filepath, cli_option_name, primary_option, options)
     cli_options = [{name: cli_option_name, value: primary_option.cli_argument_value}]
     options.each do |option|
       cli_options.push({name: option.cli_option_names.first, value: option.cli_argument_value})
@@ -101,7 +101,7 @@ class TestFilter < Minitest::Test
     execute_in_cli(filepath, cli_options_s)
   end
 
-  # Return API result.
+  # Return API result for options.
   def api_result(filepath, primary_option, options)
     api_options = {primary_option.sym => primary_option.api_argument_value}
     options.each do |option|
@@ -112,8 +112,8 @@ class TestFilter < Minitest::Test
     return exp_out_s
   end
 
-  # Get and return actual values via CLI.
-  def get_via_cli(test_method, option_name)
+  # Return results for CLI-only option (or invalid option).
+  def results_for_cli_option(test_method, option_name)
     act_out_s = ''
     act_err_s = ''
     Dir.mktmpdir do |dirpath|
@@ -142,7 +142,7 @@ class TestFilter < Minitest::Test
         # Get expected output string (from API).
         exp_out_s = api_result(filepath, primary_option, options)
         # Get actual output and error strings (from CLI).
-        act_out_s, act_err_s = cli_result(filepath, cli_option_name, primary_option, options)
+        act_out_s, act_err_s = cli_results_for_options(filepath, cli_option_name, primary_option, options)
         assert_empty(act_err_s, test_method)
         assert_equal(exp_out_s.strip, act_out_s.strip, test_method)
       end
@@ -154,7 +154,7 @@ class TestFilter < Minitest::Test
 
   def test_invalid_option
     %w[-Z --ZZZ].each do |option_name|
-      act_out_s, act_err_s = get_via_cli(__method__, option_name)
+      act_out_s, act_err_s = results_for_cli_option(__method__, option_name)
       assert_empty(act_out_s)
       assert_match(/OptionParser::InvalidOption/, act_err_s)
     end
@@ -172,7 +172,7 @@ class TestFilter < Minitest::Test
 
   def test_option_h
     %w[-h --help].each do |option_name|
-      act_out_s, act_err_s = get_via_cli(__method__, option_name)
+      act_out_s, act_err_s = results_for_cli_option(__method__, option_name)
       assert_match(/Usage/, act_out_s)
       assert_empty(act_err_s)
     end
@@ -180,7 +180,7 @@ class TestFilter < Minitest::Test
 
   def test_option_v
     %w[-v --version].each do |option_name|
-      act_out_s, act_err_s = get_via_cli(__method__, option_name)
+      act_out_s, act_err_s = results_for_cli_option(__method__, option_name)
       assert_match(/\d+\.\d+\.\d+/, act_out_s)
       assert_empty(act_err_s)
     end
