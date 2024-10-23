@@ -252,7 +252,7 @@ class TestFilter < Minitest::Test
 
   def test_option_input_col_sep
     input_col_sep = 'X'
-    act_in_s = make_csv_s(row_sep: input_col_sep)
+    act_in_s = make_csv_s(col_sep: input_col_sep)
     options = [
       Option.new(:input_col_sep, input_col_sep)
     ]
@@ -260,13 +260,14 @@ class TestFilter < Minitest::Test
     refute_equal(act_in_s, act_out_s)
   end
 
-  def zzz_test_option_output_col_sep
+  def test_option_output_col_sep
     output_col_sep = 'X'
-    act_in_s = make_csv_s(row_sep: output_col_sep)
+    act_in_s = make_csv_s
     options = [
-      Option.new(:input_col_sep, output_col_sep)
+      Option.new(:output_col_sep, output_col_sep)
     ]
-    verify_via_api(__method__, act_in_s, options)
+    act_out_s = verify_cli(__method__, act_in_s, options)
+    refute_equal(act_in_s, act_out_s)
   end
 
   def test_options_c_and_input_col_sep
