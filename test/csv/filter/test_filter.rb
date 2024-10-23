@@ -38,7 +38,7 @@ class TestFilter < Minitest::Test
 
     def initialize(sym = nil, api_argument_value = nil)
       self.sym = sym || :nil
-      self.cli_option_names = CliOptionNames[self.sym]
+      self.cli_option_names = CliOptionNames.fetch(self.sym)
       self.api_argument_value = api_argument_value
       if api_argument_value.kind_of?(Array)
         cli_argument_a = []
