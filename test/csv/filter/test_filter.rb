@@ -56,6 +56,7 @@ class TestFilter < Minitest::Test
     %w[ddd eee fff],
   ]
 
+  # Return CSV string generated from rows and options.
   def make_csv_s(rows: Rows, **options)
     CSV.generate(**options) do|csv|
       rows.each do |row|
@@ -69,6 +70,7 @@ class TestFilter < Minitest::Test
     s += " #{value}" unless value.nil?
   end
 
+  # Return filepath of file containing CSV data.
   def csv_filepath(act_in_s, dirpath, option_sym)
     filename = "#{option_sym}.csv"
     filepath = File.join(dirpath, filename)
@@ -76,6 +78,7 @@ class TestFilter < Minitest::Test
     filepath
   end
 
+  # Return stdout and stderr from CLI execution.
   def execute_in_cli(filepath, cli_options_s = '')
     command = "cat #{filepath} | ruby bin/filter #{cli_options_s}"
     capture_subprocess_io do
@@ -83,7 +86,8 @@ class TestFilter < Minitest::Test
     end
   end
 
-  def get_act_values(filepath, cli_option_name, primary_option, options)
+  # Return CLI result.
+  def cli_result(filepath, cli_option_name, primary_option, options)
     cli_options = [{name: cli_option_name, value: primary_option.cli_argument_value}]
     options.each do |option|
       cli_options.push({name: option.cli_option_names.first, value: option.cli_argument_value})
@@ -97,7 +101,8 @@ class TestFilter < Minitest::Test
     execute_in_cli(filepath, cli_options_s)
   end
 
-  def get_exp_value(filepath, primary_option, options)
+  # Return API result.
+  def api_result(filepath, primary_option, options)
     api_options = {primary_option.sym => primary_option.api_argument_value}
     options.each do |option|
       api_options[option.sym] = option.api_argument_value
@@ -135,9 +140,9 @@ class TestFilter < Minitest::Test
       filepath = csv_filepath(act_in_s, dirpath, primary_option.sym)
       primary_option.cli_option_names.each do |cli_option_name|
         # Get expected output string (from API).
-        exp_out_s = get_exp_value(filepath, primary_option, options)
+        exp_out_s = api_result(filepath, primary_option, options)
         # Get actual output and error strings (from CLI).
-        act_out_s, act_err_s = get_act_values(filepath, cli_option_name, primary_option, options)
+        act_out_s, act_err_s = cli_result(filepath, cli_option_name, primary_option, options)
         assert_empty(act_err_s, test_method)
         assert_equal(exp_out_s.strip, act_out_s.strip, test_method)
       end
