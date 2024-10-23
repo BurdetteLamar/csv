@@ -56,8 +56,8 @@ class TestFilter < Minitest::Test
     %w[ddd eee fff],
   ]
 
-  def make_csv_s(rows: Rows, row_sep: RowSep, col_sep: ColSep, quote_char: QuoteChar)
-    CSV.generate(row_sep: row_sep, col_sep: col_sep, quote_char: quote_char) do|csv|
+  def make_csv_s(rows: Rows, **options)
+    CSV.generate(**options) do|csv|
       rows.each do |row|
         csv << row
       end
