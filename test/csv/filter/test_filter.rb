@@ -131,16 +131,20 @@ class TestFilter < Minitest::Test
   def verify_cli(test_method, act_in_s, options)
     options = options.dup # Don't modify caller's options.
     act_out_s = ''
+    saved_out_s = nil
     Dir.mktmpdir do |dirpath|
       primary_option = options.shift
       filepath = csv_filepath(act_in_s, dirpath, primary_option.sym)
       primary_option.cli_option_names.each do |cli_option_name|
         # Get expected output string (from API).
         exp_out_s = api_result(filepath, primary_option, options)
+        # Output string should be the same for all iterations.
+        saved_out_s = exp_out_s if saved_out_s.nil?
+        assert_equal(saved_out_s, exp_out_s)
         # Get actual output and error strings (from CLI).
         act_out_s, act_err_s = cli_results_for_options(filepath, cli_option_name, primary_option, options)
         assert_empty(act_err_s, test_method)
-        assert_equal(exp_out_s.strip, act_out_s.strip, test_method)
+        assert_equal(exp_out_s, act_out_s, test_method)
       end
     end
     act_out_s
