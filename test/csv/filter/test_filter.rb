@@ -50,18 +50,18 @@ class TestFilter < Minitest::Test
 
   RowSep = "\n"
   ColSep = ','
+  QuoteChar = '"'
   Rows = [
     %w[aaa bbb ccc],
     %w[ddd eee fff],
   ]
 
-  def make_csv_s(rows: Rows, row_sep: RowSep, col_sep: ColSep)
-    csv_rows = []
-    rows.each do |cols|
-      csv_rows.push(cols.join(col_sep))
+  def make_csv_s(rows: Rows, row_sep: RowSep, col_sep: ColSep, quote_char: QuoteChar)
+    CSV.generate(row_sep: row_sep, col_sep: col_sep, quote_char: quote_char) do|csv|
+      rows.each do |row|
+        csv << row
+      end
     end
-    csv_rows.push('')
-    csv_rows.join(row_sep)
   end
 
   def zzz_cli_option_s(name, value)
@@ -303,13 +303,14 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, act_in_s, options.reverse)
   end
 
-  def zzz_test_option_r
+  def test_option_r
     row_sep = 'X'
     act_in_s = make_csv_s(row_sep: row_sep)
     options = [
       Option.new(:row_sep, row_sep)
     ]
-    verify_via_api(__method__, act_in_s, options)
+    act_out_s = verify_cli(__method__, act_in_s, options)
+    assert_equal(act_in_s, act_out_s)
   end
 
   def zzz_test_option_input_row_sep
@@ -366,18 +367,19 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, act_in_s, options.reverse)
   end
 
-  def zzz_test_option_q
-    quote_char = "Z"
+  def test_option_q
+    quote_char = "'"
     rows = [
       ['foo', 0],
-      ["ZbarZ", 1],
+      ["'bar'", 1],
       ['"baz"', 2],
     ]
-    act_in_s = make_csv_s(rows: rows)
+    act_in_s = make_csv_s(rows: rows, quote_char: quote_char)
     options = [
       Option.new(:quote_char, quote_char)
     ]
-    verify_via_api(__method__, act_in_s, options)
+    act_out_s = verify_cli(__method__, act_in_s, options)
+    assert_equal(act_in_s, act_out_s)
   end
 
   # Make sure we can pass multiple options.
