@@ -55,7 +55,7 @@ class TestFilter < Minitest::Test
     %w[ddd eee fff],
   ]
 
-  def zzz_make_csv_s(rows: Rows, row_sep: RowSep, col_sep: ColSep)
+  def make_csv_s(rows: Rows, row_sep: RowSep, col_sep: ColSep)
     csv_rows = []
     rows.each do |cols|
       csv_rows.push(cols.join(col_sep))
@@ -119,10 +119,10 @@ class TestFilter < Minitest::Test
     [act_out_s, act_err_s]
   end
 
-  def zzz_get_via_api(act_in_s, **api_options)
-    exp_out_s = ''
-    CSV.filter(act_in_s, exp_out_s, **api_options) {|row| }
-    exp_out_s
+  def get_via_api(act_in_s, **api_options)
+    act_out_s = ''
+    CSV.filter(act_in_s, act_out_s, **api_options) {|row| }
+    act_out_s
   end
 
   def zzz_verify_via_api(test_method, act_in_s, options = [])
@@ -166,9 +166,10 @@ class TestFilter < Minitest::Test
 
   # No options.
 
-  def zzz_test_no_options
+  def test_no_options
     act_in_s = make_csv_s
-    verify_via_api(__method__, act_in_s)
+    act_out_s = get_via_api(act_in_s)
+    assert_equal(act_in_s, act_out_s)
   end
 
   # General options
