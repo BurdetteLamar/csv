@@ -129,6 +129,7 @@ class TestFilter < Minitest::Test
   # Verify that the CLI behaves the same as the API.
   # Return the actual output.
   def verify_cli(test_method, act_in_s, options)
+    options = options.dup # Don't modify caller's options.
     act_out_s = ''
     Dir.mktmpdir do |dirpath|
       primary_option = options.shift
@@ -267,7 +268,7 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, act_in_s, options)
   end
 
-  def zzz_test_options_c_and_input_col_sep
+  def test_options_c_and_input_col_sep
     input_col_sep = 'X'
     col_sep = 'Y'
     act_in_s = make_csv_s(col_sep: input_col_sep)
@@ -275,11 +276,17 @@ class TestFilter < Minitest::Test
       Option.new(:input_col_sep, input_col_sep),
       Option.new(:col_sep, col_sep),
     ]
-    verify_via_api(__method__, act_in_s, options)
-    verify_via_api(__method__, act_in_s, options.reverse)
+    # col_sep overrides input_col_sep.
+    act_out_s = verify_cli(__method__, act_in_s, options)
+    assert_equal(act_in_s, act_out_s)
+    # input_col_sep overrides col_sep.
+    act_out_s = verify_cli(__method__, act_in_s, options.reverse)
+    act_in_a = act_in_s.split(input_col_sep)
+    act_out_a = act_out_s.split(col_sep)
+    assert_equal(act_in_a, act_out_a)
   end
 
-  def zzz_test_options_c_and_output_col_sep
+  def test_options_c_and_output_col_sep
     col_sep = 'X'
     output_col_sep = 'Y'
     act_in_s = make_csv_s(col_sep: col_sep)
@@ -287,11 +294,11 @@ class TestFilter < Minitest::Test
       Option.new(:output_col_sep, output_col_sep),
       Option.new(:col_sep, col_sep),
     ]
-    verify_via_api(__method__, act_in_s, options)
-    verify_via_api(__method__, act_in_s, options.reverse)
+    verify_cli(__method__, act_in_s, options)
+    verify_cli(__method__, act_in_s, options.reverse)
   end
 
-  def zzz_test_options_input_col_sep_and_output_col_sep
+  def test_options_input_col_sep_and_output_col_sep
     input_col_sep = 'X'
     output_col_sep = 'Y'
     act_in_s = make_csv_s(col_sep: input_col_sep)
@@ -299,8 +306,8 @@ class TestFilter < Minitest::Test
       Option.new(:input_col_sep, input_col_sep),
       Option.new(:output_col_sep, output_col_sep),
     ]
-    verify_via_api(__method__, act_in_s, options)
-    verify_via_api(__method__, act_in_s, options.reverse)
+    verify_cli(__method__, act_in_s, options)
+    verify_cli(__method__, act_in_s, options.reverse)
   end
 
   def test_option_r
