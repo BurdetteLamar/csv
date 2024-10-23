@@ -6,6 +6,8 @@ require 'csv'
 require 'tempfile'
 require 'shellwords'
 
+$TEST_DEBUG = false
+
 class TestFilter < Minitest::Test
 
   # Names and aliases for options.
@@ -59,13 +61,20 @@ class TestFilter < Minitest::Test
     %w[ddd eee fff],
   ]
 
+  def debug(label, value)
+    return unless $TEST_DEBUG
+    p "#{label}: '#{value}'"
+  end
+
   # Return CSV string generated from rows and options.
   def make_csv_s(rows: Rows, **options)
-    CSV.generate(**options) do|csv|
+    csv_s = CSV.generate(**options) do|csv|
       rows.each do |row|
         csv << row
       end
     end
+    debug('csv_s', csv_s)
+    csv_s
   end
 
   # Return filepath of file containing CSV data.
@@ -133,7 +142,9 @@ class TestFilter < Minitest::Test
   # Return the actual output.
   def verify_cli(test_method, act_in_s, options)
     options = options.dup # Don't modify caller's options.
+    exp_out_s = ''
     act_out_s = ''
+    act_err_s = ''
     saved_out_s = nil
     Dir.mktmpdir do |dirpath|
       primary_option = options.shift
@@ -150,12 +161,16 @@ class TestFilter < Minitest::Test
         assert_equal(saved_out_s, act_out_s)
       end
     end
+    debug('exp_out_s', exp_out_s)
+    debug('act_out_s', act_out_s)
+    debug('act_err_s', act_err_s)
     act_out_s
   end
 
   # Invalid option.
 
   def test_invalid_option
+    debug('test_method', __method__)
     %w[-Z --ZZZ].each do |option_name|
       act_out_s, act_err_s = results_for_cli_option(__method__, option_name)
       assert_empty(act_out_s)
@@ -166,6 +181,7 @@ class TestFilter < Minitest::Test
   # No options.
 
   def test_no_options
+    debug('test_method', __method__)
     act_in_s = make_csv_s
     act_out_s = get_via_api(act_in_s)
     assert_equal(act_in_s, act_out_s)
@@ -174,6 +190,7 @@ class TestFilter < Minitest::Test
   # General options
 
   def test_option_h
+    debug('test_method', __method__)
     %w[-h --help].each do |option_name|
       act_out_s, act_err_s = results_for_cli_option(__method__, option_name)
       assert_match(/Usage/, act_out_s)
@@ -182,6 +199,7 @@ class TestFilter < Minitest::Test
   end
 
   def test_option_v
+    debug('test_method', __method__)
     %w[-v --version].each do |option_name|
       act_out_s, act_err_s = results_for_cli_option(__method__, option_name)
       assert_match(/\d+\.\d+\.\d+/, act_out_s)
@@ -192,6 +210,7 @@ class TestFilter < Minitest::Test
   # Input options.
 
   def zzz_test_option_converters
+    debug('test_method', __method__)
     converters = %i[integer float]
     rows = [
       ['foo', 0],
@@ -205,6 +224,7 @@ class TestFilter < Minitest::Test
   end
 
   def zzz_test_option_field_size_limit
+    debug('test_method', __method__)
     field_size_limit = 20
     act_in_s = make_csv_s
     options = [
@@ -214,6 +234,7 @@ class TestFilter < Minitest::Test
   end
 
   def zzz_test_option_headers
+    debug('test_method', __method__)
     headers = nil
     act_in_s = make_csv_s
     options = [
@@ -223,6 +244,7 @@ class TestFilter < Minitest::Test
   end
 
   def zzz_test_option_header_converters
+    debug('test_method', __method__)
     header_converters = %i[downcase symbol]
     rows = [
       ['Foo', 'Bar'],
@@ -237,6 +259,7 @@ class TestFilter < Minitest::Test
   end
 
   def zzz_test_option_unconverted_fields
+    debug('test_method', __method__)
     unconverted_fields = nil
     act_in_s = make_csv_s
     options = [
@@ -248,6 +271,7 @@ class TestFilter < Minitest::Test
   # Input/output options.
 
   def test_option_c
+    debug('test_method', __method__)
     col_sep = 'X'
     act_in_s = make_csv_s(col_sep: col_sep)
     options = [
@@ -258,6 +282,7 @@ class TestFilter < Minitest::Test
   end
 
   def test_option_input_col_sep
+    debug('test_method', __method__)
     input_col_sep = 'X'
     act_in_s = make_csv_s(col_sep: input_col_sep)
     options = [
@@ -268,6 +293,7 @@ class TestFilter < Minitest::Test
   end
 
   def test_option_output_col_sep
+    debug('test_method', __method__)
     output_col_sep = 'X'
     act_in_s = make_csv_s
     options = [
@@ -278,6 +304,7 @@ class TestFilter < Minitest::Test
   end
 
   def test_options_c_and_input_col_sep
+    debug('test_method', __method__)
     input_col_sep = 'X'
     col_sep = 'Y'
     act_in_s = make_csv_s(col_sep: input_col_sep)
@@ -294,6 +321,7 @@ class TestFilter < Minitest::Test
   end
 
   def test_options_c_and_output_col_sep
+    debug('test_method', __method__)
     col_sep = 'X'
     output_col_sep = 'Y'
     act_in_s = make_csv_s(col_sep: col_sep)
@@ -310,6 +338,7 @@ class TestFilter < Minitest::Test
   end
 
   def test_options_input_col_sep_and_output_col_sep
+    debug('test_method', __method__)
     input_col_sep = 'X'
     output_col_sep = 'Y'
     act_in_s = make_csv_s(col_sep: input_col_sep)
@@ -324,6 +353,7 @@ class TestFilter < Minitest::Test
   end
 
   def test_option_r
+    debug('test_method', __method__)
     row_sep = 'X'
     act_in_s = make_csv_s(row_sep: row_sep)
     options = [
@@ -334,6 +364,7 @@ class TestFilter < Minitest::Test
   end
 
   def test_option_input_row_sep
+    debug('test_method', __method__)
     input_row_sep = 'A'
     act_in_s = make_csv_s(row_sep: input_row_sep)
     options = [
@@ -344,6 +375,7 @@ class TestFilter < Minitest::Test
   end
 
   def test_option_output_row_sep
+    debug('test_method', __method__)
     output_row_sep = 'A'
     act_in_s = make_csv_s(row_sep: output_row_sep)
     options = [
@@ -354,6 +386,7 @@ class TestFilter < Minitest::Test
   end
 
   def test_options_r_and_input_row_sep
+    debug('test_method', __method__)
     input_row_sep = 'X'
     row_sep = 'Y'
     act_in_s = make_csv_s(row_sep: input_row_sep)
@@ -370,6 +403,7 @@ class TestFilter < Minitest::Test
   end
 
   def test_options_r_and_output_row_sep
+    debug('test_method', __method__)
     row_sep = 'X'
     output_row_sep = 'Y'
     act_in_s = make_csv_s(row_sep: row_sep)
@@ -386,6 +420,7 @@ class TestFilter < Minitest::Test
   end
 
   def test_options_input_row_sep_and_output_row_sep
+    debug('test_method', __method__)
     input_row_sep = 'X'
     output_row_sep = 'Y'
     act_in_s = make_csv_s(row_sep: input_row_sep)
@@ -402,6 +437,7 @@ class TestFilter < Minitest::Test
   end
 
   def test_option_q
+    debug('test_method', __method__)
     quote_char = "'"
     rows = [
       ['foo', 0],
@@ -417,6 +453,7 @@ class TestFilter < Minitest::Test
   end
 
   def test_option_input_quote_char
+    debug('test_method', __method__)
     input_quote_char = "'"
     rows = [
       ['foo', 0],
@@ -432,6 +469,7 @@ class TestFilter < Minitest::Test
   end
 
   def test_option_output_quote_char
+    debug('test_method', __method__)
     output_quote_char = "X"
     rows = [
       ['foo', 0],
