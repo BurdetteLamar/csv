@@ -55,7 +55,7 @@ class TestFilter < Minitest::Test
     %w[ddd eee fff],
   ]
 
-  def make_csv_s(rows: Rows, row_sep: RowSep, col_sep: ColSep)
+  def zzz_make_csv_s(rows: Rows, row_sep: RowSep, col_sep: ColSep)
     csv_rows = []
     rows.each do |cols|
       csv_rows.push(cols.join(col_sep))
@@ -64,7 +64,7 @@ class TestFilter < Minitest::Test
     csv_rows.join(row_sep)
   end
 
-  def cli_option_s(name, value)
+  def zzz_cli_option_s(name, value)
     s = name
     s += " #{value}" unless value.nil?
   end
@@ -83,7 +83,7 @@ class TestFilter < Minitest::Test
     end
   end
 
-  def get_act_values(filepath, cli_option_name, primary_option, options)
+  def zzz_get_act_values(filepath, cli_option_name, primary_option, options)
     cli_options = [{name: cli_option_name, value: primary_option.cli_argument_value}]
     options.each do |option|
       cli_options.push({name: option.cli_option_names.first, value: option.cli_argument_value})
@@ -97,7 +97,7 @@ class TestFilter < Minitest::Test
     execute_in_cli(filepath, cli_options_s)
   end
 
-  def get_exp_value(filepath, primary_option, options)
+  def zzz_get_exp_value(filepath, primary_option, options)
     api_options = {primary_option.sym => primary_option.api_argument_value}
     options.each do |option|
       api_options[option.sym] = option.api_argument_value
@@ -119,13 +119,13 @@ class TestFilter < Minitest::Test
     [act_out_s, act_err_s]
   end
 
-  def get_via_api(act_in_s, **api_options)
+  def zzz_get_via_api(act_in_s, **api_options)
     exp_out_s = ''
     CSV.filter(act_in_s, exp_out_s, **api_options) {|row| }
     exp_out_s
   end
 
-  def verify_via_api(test_method, act_in_s, options = [])
+  def zzz_verify_via_api(test_method, act_in_s, options = [])
     Dir.mktmpdir do |dirpath|
       if options.empty?
         # Get expected output string (via API).
@@ -149,7 +149,7 @@ class TestFilter < Minitest::Test
     end
   end
 
-  def assert_all(test_method, exp_out_s, act_out_s, act_err_s)
+  def zzz_assert_all(test_method, exp_out_s, act_out_s, act_err_s)
     assert_empty(act_err_s, test_method)
     assert_equal(exp_out_s.strip, act_out_s.strip, test_method)
   end
