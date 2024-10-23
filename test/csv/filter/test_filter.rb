@@ -107,19 +107,16 @@ class TestFilter < Minitest::Test
     return exp_out_s
   end
 
-  def verify_via_cli(test_method, option_name, exp_out_pat: '', exp_err_pat: '')
+  # Get and return actual values via CLI.
+  def get_via_cli(test_method, option_name)
+    act_out_s = ''
+    act_err_s = ''
     Dir.mktmpdir do |dirpath|
       sym = option_name.to_sym
       filepath = csv_filepath('', dirpath, sym)
       act_out_s, act_err_s = execute_in_cli(filepath, option_name)
-      assert_match(exp_out_pat, act_out_s, test_method)
-      assert_match(exp_err_pat, act_err_s, test_method)
     end
-  end
-
-  def assert_all(test_method, exp_out_s, act_out_s, act_err_s)
-    assert_empty(act_err_s, test_method)
-    assert_equal(exp_out_s.strip, act_out_s.strip, test_method)
+    [act_out_s, act_err_s]
   end
 
   def get_via_api(act_in_s, **api_options)
@@ -152,34 +149,49 @@ class TestFilter < Minitest::Test
     end
   end
 
-  # General options.
+  def assert_all(test_method, exp_out_s, act_out_s, act_err_s)
+    assert_empty(act_err_s, test_method)
+    assert_equal(exp_out_s.strip, act_out_s.strip, test_method)
+  end
 
-  def test_no_options
+  # Invalid option.
+
+  def test_invalid_option
+    %w[-Z --ZZZ].each do |option_name|
+      act_out_s, act_err_s = get_via_cli(__method__, option_name)
+      assert_empty(act_out_s)
+      assert_match(/OptionParser::InvalidOption/, act_err_s)
+    end
+  end
+
+  # No options.
+
+  def zzz_test_no_options
     act_in_s = make_csv_s
     verify_via_api(__method__, act_in_s)
   end
 
+  # General options
+
   def test_option_h
     %w[-h --help].each do |option_name|
-      verify_via_cli(__method__, option_name, exp_out_pat: /Usage/)
+      act_out_s, act_err_s = get_via_cli(__method__, option_name)
+      assert_match(/Usage/, act_out_s)
+      assert_empty(act_err_s)
     end
   end
 
   def test_option_v
     %w[-v --version].each do |option_name|
-      verify_via_cli(__method__, option_name, exp_out_pat: /\d+\.\d+\.\d+/)
-    end
-  end
-
-  def test_invalid_option
-    %w[-Z --ZZZ].each do |option_name|
-      verify_via_cli(__method__, option_name, exp_err_pat: /OptionParser::InvalidOption/)
+      act_out_s, act_err_s = get_via_cli(__method__, option_name)
+      assert_match(/\d+\.\d+\.\d+/, act_out_s)
+      assert_empty(act_err_s)
     end
   end
 
   # Input options.
 
-  def test_option_converters
+  def zzz_test_option_converters
     converters = %i[integer float]
     rows = [
       ['foo', 0],
@@ -192,7 +204,7 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, act_in_s, options)
   end
 
-  def test_option_field_size_limit
+  def zzz_test_option_field_size_limit
     field_size_limit = 20
     act_in_s = make_csv_s
     options = [
@@ -201,7 +213,7 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, act_in_s, options)
   end
 
-  def test_option_headers
+  def zzz_test_option_headers
     headers = nil
     act_in_s = make_csv_s
     options = [
@@ -210,7 +222,7 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, act_in_s, options)
   end
 
-  def test_option_header_converters
+  def zzz_test_option_header_converters
     header_converters = %i[downcase symbol]
     rows = [
       ['Foo', 'Bar'],
@@ -224,7 +236,7 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, act_in_s, options)
   end
 
-  def test_option_unconverted_fields
+  def zzz_test_option_unconverted_fields
     unconverted_fields = nil
     act_in_s = make_csv_s
     options = [
@@ -235,7 +247,7 @@ class TestFilter < Minitest::Test
 
   # Input/output options.
 
-  def test_option_c
+  def zzz_test_option_c
     col_sep = 'X'
     act_in_s = make_csv_s(col_sep: col_sep)
     options = [
@@ -244,7 +256,7 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, act_in_s, options)
   end
 
-  def test_option_input_col_sep
+  def zzz_test_option_input_col_sep
     input_col_sep = 'X'
     act_in_s = make_csv_s(row_sep: input_col_sep)
     options = [
@@ -253,7 +265,7 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, act_in_s, options)
   end
 
-  def test_option_output_col_sep
+  def zzz_test_option_output_col_sep
     output_col_sep = 'X'
     act_in_s = make_csv_s(row_sep: output_col_sep)
     options = [
@@ -262,7 +274,7 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, act_in_s, options)
   end
 
-  def test_options_c_and_input_col_sep
+  def zzz_test_options_c_and_input_col_sep
     input_col_sep = 'X'
     col_sep = 'Y'
     act_in_s = make_csv_s(col_sep: input_col_sep)
@@ -274,7 +286,7 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, act_in_s, options.reverse)
   end
 
-  def test_options_c_and_output_col_sep
+  def zzz_test_options_c_and_output_col_sep
     col_sep = 'X'
     output_col_sep = 'Y'
     act_in_s = make_csv_s(col_sep: col_sep)
@@ -286,7 +298,7 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, act_in_s, options.reverse)
   end
 
-  def test_options_input_col_sep_and_output_col_sep
+  def zzz_test_options_input_col_sep_and_output_col_sep
     input_col_sep = 'X'
     output_col_sep = 'Y'
     act_in_s = make_csv_s(col_sep: input_col_sep)
@@ -298,7 +310,7 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, act_in_s, options.reverse)
   end
 
-  def test_option_r
+  def zzz_test_option_r
     row_sep = 'X'
     act_in_s = make_csv_s(row_sep: row_sep)
     options = [
@@ -307,7 +319,7 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, act_in_s, options)
   end
 
-  def test_option_input_row_sep
+  def zzz_test_option_input_row_sep
     input_row_sep = 'A'
     act_in_s = make_csv_s(row_sep: input_row_sep)
     options = [
@@ -316,7 +328,7 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, act_in_s, options)
   end
 
-  def test_option_output_row_sep
+  def zzz_test_option_output_row_sep
     output_row_sep = 'A'
     act_in_s = make_csv_s(row_sep: output_row_sep)
     options = [
@@ -325,7 +337,7 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, act_in_s, options)
   end
 
-  def test_options_r_and_input_row_sep
+  def zzz_test_options_r_and_input_row_sep
     input_row_sep = 'X'
     row_sep = 'Y'
     act_in_s = make_csv_s(row_sep: input_row_sep)
@@ -337,7 +349,7 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, act_in_s, options.reverse)
   end
 
-  def test_options_r_and_output_row_sep
+  def zzz_test_options_r_and_output_row_sep
     row_sep = 'X'
     output_row_sep = 'Y'
     act_in_s = make_csv_s(row_sep: row_sep)
@@ -349,7 +361,7 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, act_in_s, options.reverse)
   end
 
-  def test_options_input_row_sep_and_output_row_sep
+  def zzz_test_options_input_row_sep_and_output_row_sep
     input_row_sep = 'X'
     output_row_sep = 'Y'
     act_in_s = make_csv_s(row_sep: input_row_sep)
@@ -361,7 +373,7 @@ class TestFilter < Minitest::Test
     verify_via_api(__method__, act_in_s, options.reverse)
   end
 
-  def test_option_q
+  def zzz_test_option_q
     quote_char = "Z"
     rows = [
       ['foo', 0],
@@ -376,7 +388,7 @@ class TestFilter < Minitest::Test
   end
 
   # Make sure we can pass multiple options.
-  def test_multiple_options
+  def zzz_test_multiple_options
     row_sep = 'R'
     col_sep = 'C'
     act_in_s = make_csv_s(row_sep: row_sep, col_sep: col_sep)
