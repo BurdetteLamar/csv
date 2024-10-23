@@ -15,12 +15,15 @@ class TestFilter < Minitest::Test
     field_size_limit: %w[--field_size_limit],
     headers: %w[--headers],
     header_converters: %w[--header_converters],
-    input_row_sep: %w[--input_row_sep --in_row_sep],
     input_col_sep: %w[--input_col_sep --in_col_sep],
+    input_quote_char: %W[--input_quote_char --in_quote_char],
+    input_row_sep: %w[--input_row_sep --in_row_sep],
     unconverted_fields: %w[--unconverted_fields],
     # Output options.
-    output_row_sep: %w[--output_row_sep --out_row_sep],
+    force_quotes: %W[--force_quotes],
     output_col_sep: %w[--output_col_sep --out_col_sep],
+    output_quote_char: %W[--output_quote_char --out_quote_char],
+    output_row_sep: %w[--output_row_sep --out_row_sep],
     # Input/output options.
     col_sep: %w[-c --col_sep],
     row_sep: %w[-r --row_sep],
@@ -91,7 +94,7 @@ class TestFilter < Minitest::Test
     cli_options.each do |cli_option|
       cli_options_s += " #{cli_option[:name]}"
       value = cli_option[:value]
-      cli_options_s += " #{Shellwords.escape(value)}" unless value.nil?
+      cli_options_s += " #{Shellwords.escape(value)}" unless [nil, true].include?(value)
     end
     execute_in_cli(filepath, cli_options_s)
   end
@@ -413,16 +416,35 @@ class TestFilter < Minitest::Test
     assert_equal(act_in_s, act_out_s)
   end
 
-  # Make sure we can pass multiple options.
-  def zzz_test_multiple_options
-    row_sep = 'R'
-    col_sep = 'C'
-    act_in_s = make_csv_s(row_sep: row_sep, col_sep: col_sep)
-    options = [
-      Option.new(:row_sep, row_sep),
-      Option.new(:col_sep, col_sep),
+  def test_option_input_quote_char
+    input_quote_char = "'"
+    rows = [
+      ['foo', 0],
+      ["'bar'", 1],
+      ['"baz"', 2],
     ]
-    verify_via_api(__method__, act_in_s, options)
+    act_in_s = make_csv_s(rows: rows, quote_char: input_quote_char)
+    options = [
+      Option.new(:input_quote_char, input_quote_char)
+    ]
+    act_out_s = verify_cli(__method__, act_in_s, options)
+    refute_equal(act_in_s, act_out_s)
+  end
+
+  def test_option_output_quote_char
+    output_quote_char = "X"
+    rows = [
+      ['foo', 0],
+      ["'bar'", 1],
+      ['"baz"', 2],
+    ]
+    act_in_s = make_csv_s(rows: rows)
+    options = [
+      Option.new(:output_quote_char, output_quote_char),
+      Option.new(:force_quotes, true)
+    ]
+    act_out_s = verify_cli(__method__, act_in_s, options)
+    refute_equal(act_in_s, act_out_s)
   end
 
 end
