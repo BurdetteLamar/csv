@@ -61,9 +61,23 @@ class TestFilter < Minitest::Test
     %w[ddd eee fff],
   ]
 
-  def debug(label, value)
+  def debug(label, value, newline: false)
     return unless $TEST_DEBUG
-    p "#{label}: '#{value}'"
+    print("\n") if newline
+    printf("%12s: %s\n", label, value.inspect)
+  end
+
+  def do_test(debugging: false)
+    if debugging
+      $TEST_DEBUG = true
+      test_name = caller[0].split(' ').last.gsub(/\W/, '')
+      debug('BEGIN', test_name, newline: true)
+      yield
+      debug('END', test_name)
+      $TEST_DEBUG = false
+    else
+      yield
+    end
   end
 
   # Return CSV string generated from rows and options.
@@ -73,7 +87,7 @@ class TestFilter < Minitest::Test
         csv << row
       end
     end
-    debug('csv_s', csv_s)
+    debug('act_in_s', csv_s)
     csv_s
   end
 
@@ -271,14 +285,15 @@ class TestFilter < Minitest::Test
   # Input/output options.
 
   def test_option_c
-    debug('test_method', __method__)
-    col_sep = 'X'
-    act_in_s = make_csv_s(col_sep: col_sep)
-    options = [
-      Option.new(:col_sep, col_sep)
-    ]
-    act_out_s = verify_cli(__method__, act_in_s, options)
-    assert_equal(act_in_s, act_out_s)
+    do_test(debugging: true) do
+      col_sep = 'X'
+      act_in_s = make_csv_s(col_sep: col_sep)
+      options = [
+        Option.new(:col_sep, col_sep)
+      ]
+      act_out_s = verify_cli(__method__, act_in_s, options)
+      assert_equal(act_in_s, act_out_s)
+    end
   end
 
   def test_option_input_col_sep
