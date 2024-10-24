@@ -172,7 +172,7 @@ class TestFilter < Minitest::Test
 
   # Verify that the CLI behaves the same as the API.
   # Return the actual output.
-  def verify_cli(test_method, act_in_s, options)
+  def verify_cli(act_in_s, options)
     options = options.dup # Don't modify caller's options.
     exp_out_s = ''
     act_out_s = ''
@@ -186,8 +186,8 @@ class TestFilter < Minitest::Test
         exp_out_s = api_result(filepath, primary_option, options)
         # Get actual output and error strings (from CLI).
         act_out_s, act_err_s = cli_results_for_options(filepath, cli_option_name, primary_option, options)
-        assert_empty(act_err_s, test_method)
-        assert_equal(exp_out_s, act_out_s, test_method)
+        assert_empty(act_err_s)
+        assert_equal(exp_out_s, act_out_s)
         # Output string should be the same for all iterations.
         saved_out_s = act_out_s if saved_out_s.nil?
         assert_equal(saved_out_s, act_out_s)
@@ -314,7 +314,7 @@ class TestFilter < Minitest::Test
       options = [
         Option.new(:col_sep, col_sep)
       ]
-      act_out_s = verify_cli(__method__, act_in_s, options)
+      act_out_s = verify_cli(act_in_s, options)
       expect_equal(act_in_s, act_out_s)
     end
   end
@@ -326,7 +326,7 @@ class TestFilter < Minitest::Test
       options = [
         Option.new(:input_col_sep, input_col_sep)
       ]
-      act_out_s = verify_cli(__method__, act_in_s, options)
+      act_out_s = verify_cli(act_in_s, options)
       doubt_equal(act_in_s, act_out_s)
     end
   end
@@ -338,7 +338,7 @@ class TestFilter < Minitest::Test
       options = [
         Option.new(:output_col_sep, output_col_sep)
       ]
-      act_out_s = verify_cli(__method__, act_in_s, options)
+      act_out_s = verify_cli(act_in_s, options)
       doubt_equal(act_in_s, act_out_s)
     end
   end
@@ -354,10 +354,10 @@ class TestFilter < Minitest::Test
         Option.new(:col_sep, col_sep),
       ]
       # col_sep overrides input_col_sep.
-      act_out_s = verify_cli(__method__, act_in_s, options)
+      act_out_s = verify_cli(act_in_s, options)
       expect_equal(act_in_s, act_out_s)
       # input_col_sep overrides col_sep.
-      act_out_s = verify_cli(__method__, act_in_s, options.reverse)
+      act_out_s = verify_cli(act_in_s, options.reverse)
       doubt_equal(act_in_s, act_out_s)
     end
   end
@@ -372,10 +372,10 @@ class TestFilter < Minitest::Test
         Option.new(:col_sep, col_sep),
       ]
       # col_sep overrides output_col_sep.
-      act_out_s = verify_cli(__method__, act_in_s, options)
+      act_out_s = verify_cli(act_in_s, options)
       expect_equal(act_in_s, act_out_s)
       # output_col_sep overrides col_sep.
-      act_out_s = verify_cli(__method__, act_in_s, options.reverse)
+      act_out_s = verify_cli(act_in_s, options.reverse)
       doubt_equal(act_in_s, act_out_s)
     end
   end
@@ -389,9 +389,9 @@ class TestFilter < Minitest::Test
         Option.new(:input_col_sep, input_col_sep),
         Option.new(:output_col_sep, output_col_sep),
       ]
-      act_out_s = verify_cli(__method__, act_in_s, options)
+      act_out_s = verify_cli(act_in_s, options)
       doubt_equal(act_in_s, act_out_s)
-      act_out_s = verify_cli(__method__, act_in_s, options.reverse)
+      act_out_s = verify_cli(act_in_s, options.reverse)
       doubt_equal(act_in_s, act_out_s)
     end
   end
@@ -403,7 +403,7 @@ class TestFilter < Minitest::Test
       options = [
         Option.new(:row_sep, row_sep)
       ]
-      act_out_s = verify_cli(__method__, act_in_s, options)
+      act_out_s = verify_cli(act_in_s, options)
       expect_equal(act_in_s, act_out_s)
     end
   end
@@ -415,7 +415,7 @@ class TestFilter < Minitest::Test
       options = [
         Option.new(:input_row_sep, input_row_sep)
       ]
-      act_out_s = verify_cli(__method__, act_in_s, options)
+      act_out_s = verify_cli(act_in_s, options)
       doubt_equal(act_in_s, act_out_s)
     end
   end
@@ -427,7 +427,7 @@ class TestFilter < Minitest::Test
       options = [
         Option.new(:input_row_sep, output_row_sep)
       ]
-      act_out_s = verify_cli(__method__, act_in_s, options)
+      act_out_s = verify_cli(act_in_s, options)
       doubt_equal(act_in_s, act_out_s)
     end
   end
@@ -442,10 +442,10 @@ class TestFilter < Minitest::Test
         Option.new(:row_sep, row_sep),
       ]
       # row_sep overrides input_row_sep.
-      act_out_s = verify_cli(__method__, act_in_s, options)
+      act_out_s = verify_cli(act_in_s, options)
       doubt_equal(act_in_s, act_out_s)
       # input_row_sep overrides row_sep.
-      act_out_s = verify_cli(__method__, act_in_s, options.reverse)
+      act_out_s = verify_cli(act_in_s, options.reverse)
       doubt_equal(act_in_s, act_out_s)
     end
   end
@@ -460,10 +460,10 @@ class TestFilter < Minitest::Test
         Option.new(:row_sep, row_sep),
       ]
       # row_sep overrides output_row_sep.
-      act_out_s = verify_cli(__method__, act_in_s, options)
+      act_out_s = verify_cli(act_in_s, options)
       expect_equal(act_in_s, act_out_s)
       # output_row_sep overrides row_sep.
-      act_out_s = verify_cli(__method__, act_in_s, options.reverse)
+      act_out_s = verify_cli(act_in_s, options.reverse)
       doubt_equal(act_in_s, act_out_s)
     end
   end
@@ -478,10 +478,10 @@ class TestFilter < Minitest::Test
         Option.new(:output_row_sep, output_row_sep),
       ]
       # row_sep overrides output_row_sep.
-      act_out_s = verify_cli(__method__, act_in_s, options)
+      act_out_s = verify_cli(act_in_s, options)
       doubt_equal(act_in_s, act_out_s)
       # output_row_sep overrides row_sep.
-      act_out_s = verify_cli(__method__, act_in_s, options.reverse)
+      act_out_s = verify_cli(act_in_s, options.reverse)
       doubt_equal(act_in_s, act_out_s)
     end
   end
@@ -498,7 +498,7 @@ class TestFilter < Minitest::Test
       options = [
         Option.new(:quote_char, quote_char)
       ]
-      act_out_s = verify_cli(__method__, act_in_s, options)
+      act_out_s = verify_cli(act_in_s, options)
       expect_equal(act_in_s, act_out_s)
     end
   end
@@ -515,7 +515,7 @@ class TestFilter < Minitest::Test
       options = [
         Option.new(:input_quote_char, input_quote_char)
       ]
-      act_out_s = verify_cli(__method__, act_in_s, options)
+      act_out_s = verify_cli(act_in_s, options)
       doubt_equal(act_in_s, act_out_s)
     end
   end
@@ -533,7 +533,7 @@ class TestFilter < Minitest::Test
         Option.new(:output_quote_char, output_quote_char),
         Option.new(:force_quotes, true)
       ]
-      act_out_s = verify_cli(__method__, act_in_s, options)
+      act_out_s = verify_cli(act_in_s, options)
       doubt_equal(act_in_s, act_out_s)
     end
   end
