@@ -61,6 +61,14 @@ class TestFilter < Minitest::Test
     %w[ddd eee fff],
   ]
 
+  def soft_assert_equal(exp_s, act_s)
+    assert_equal(exp_s, act_s)
+  end
+
+  def soft_refute_equal(exp_s, act_s)
+    refute_equal(exp_s, act_s)
+  end
+
   def debug(label, value, newline: false)
     return unless $TEST_DEBUG
     print("\n") if newline
@@ -287,14 +295,14 @@ class TestFilter < Minitest::Test
   # Input/output options.
 
   def test_option_c
-    do_test(debugging: false) do
+    do_test(debugging: true) do
       col_sep = 'X'
       act_in_s = make_csv_s(col_sep: col_sep)
       options = [
         Option.new(:col_sep, col_sep)
       ]
       act_out_s = verify_cli(__method__, act_in_s, options)
-      assert_equal(act_in_s, act_out_s)
+      soft_assert_equal(act_in_s, act_out_s)
     end
   end
 
@@ -306,19 +314,20 @@ class TestFilter < Minitest::Test
         Option.new(:input_col_sep, input_col_sep)
       ]
       act_out_s = verify_cli(__method__, act_in_s, options)
-      refute_equal(act_in_s, act_out_s)
+      soft_refute_equal(act_in_s, act_out_s)
     end
   end
 
   def test_option_output_col_sep
-    debug('test_method', __method__)
-    output_col_sep = 'X'
-    act_in_s = make_csv_s
-    options = [
-      Option.new(:output_col_sep, output_col_sep)
-    ]
+    do_test(debugging: true) do
+      output_col_sep = 'X'
+      act_in_s = make_csv_s
+      options = [
+        Option.new(:output_col_sep, output_col_sep)
+      ]
     act_out_s = verify_cli(__method__, act_in_s, options)
-    refute_equal(act_in_s, act_out_s)
+      soft_refute_equal(act_in_s, act_out_s)
+    end
   end
 
   def test_options_c_and_input_col_sep
