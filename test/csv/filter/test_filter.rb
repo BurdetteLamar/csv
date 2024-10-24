@@ -76,16 +76,16 @@ class TestFilter < Minitest::Test
   end
 
   def do_test(debugging: false)
-    if debugging
-      $TEST_DEBUG = true
-      test_name = caller[0].split(' ').last.gsub(/\W/, '')
-      debug('BEGIN', test_name, newline: true)
+    unless debugging
       yield
-      debug('END', test_name)
-      $TEST_DEBUG = false
-    else
-      yield
+      return
     end
+    $TEST_DEBUG = true
+    test_name = caller[0].split(' ').last.gsub(/\W/, '')
+    debug('BEGIN', test_name, newline: true)
+    yield
+    debug('END', test_name)
+    $TEST_DEBUG = false
   end
 
   # Return CSV string generated from rows and options.
