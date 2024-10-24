@@ -75,13 +75,22 @@ class TestFilter < Minitest::Test
     printf("%15s: %s\n", label, value.inspect)
   end
 
+  def get_test_name
+    caller.each do |x|
+      method_name = x.split(' ').last.gsub(/\W/, '')
+      return method_name if method_name.start_with?('test')
+    end
+    raise RuntimeError.new('No test method name found.')
+  end
+
   def do_test(debugging: false)
     unless debugging
       yield
       return
     end
+    get_test_name
     $TEST_DEBUG = true
-    test_name = caller[0].split(' ').last.gsub(/\W/, '')
+    test_name = get_test_name
     debug('BEGIN', test_name, newline: true)
     yield
     debug('END', test_name)
@@ -194,7 +203,7 @@ class TestFilter < Minitest::Test
   # Invalid option.
 
   def test_invalid_option
-    do_test(debugging: false) do
+    do_test(debugging: true) do
       %w[-Z --ZZZ].each do |option_name|
         act_out_s, act_err_s = results_for_cli_option(__method__, option_name)
         assert_empty(act_out_s)
