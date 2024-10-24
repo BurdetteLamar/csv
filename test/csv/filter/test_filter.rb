@@ -64,7 +64,7 @@ class TestFilter < Minitest::Test
   def debug(label, value, newline: false)
     return unless $TEST_DEBUG
     print("\n") if newline
-    printf("%12s: %s\n", label, value.inspect)
+    printf("%15s: %s\n", label, value.inspect)
   end
 
   def do_test(debugging: false)
@@ -87,7 +87,6 @@ class TestFilter < Minitest::Test
         csv << row
       end
     end
-    debug('act_in_s', csv_s)
     csv_s
   end
 
@@ -101,6 +100,7 @@ class TestFilter < Minitest::Test
 
   # Return stdout and stderr from CLI execution.
   def execute_in_cli(filepath, cli_options_s = '')
+    debug('cli_options_s', cli_options_s)
     command = "cat #{filepath} | ruby bin/filter #{cli_options_s}"
     capture_subprocess_io do
       system(command)
@@ -129,6 +129,7 @@ class TestFilter < Minitest::Test
       api_options[option.sym] = option.api_argument_value
     end
     act_in_s = File.read(filepath)
+    debug('api_options_h', api_options)
     exp_out_s = get_via_api(act_in_s, **api_options)
     return exp_out_s
   end
@@ -175,6 +176,7 @@ class TestFilter < Minitest::Test
         assert_equal(saved_out_s, act_out_s)
       end
     end
+    debug('act_in_s', act_in_s)
     debug('exp_out_s', exp_out_s)
     debug('act_out_s', act_out_s)
     debug('act_err_s', act_err_s)
@@ -285,7 +287,7 @@ class TestFilter < Minitest::Test
   # Input/output options.
 
   def test_option_c
-    do_test(debugging: true) do
+    do_test(debugging: false) do
       col_sep = 'X'
       act_in_s = make_csv_s(col_sep: col_sep)
       options = [
@@ -297,14 +299,15 @@ class TestFilter < Minitest::Test
   end
 
   def test_option_input_col_sep
-    debug('test_method', __method__)
-    input_col_sep = 'X'
-    act_in_s = make_csv_s(col_sep: input_col_sep)
-    options = [
-      Option.new(:input_col_sep, input_col_sep)
-    ]
-    act_out_s = verify_cli(__method__, act_in_s, options)
-    refute_equal(act_in_s, act_out_s)
+    do_test(debugging: true) do
+      input_col_sep = 'X'
+      act_in_s = make_csv_s(col_sep: input_col_sep)
+      options = [
+        Option.new(:input_col_sep, input_col_sep)
+      ]
+      act_out_s = verify_cli(__method__, act_in_s, options)
+      refute_equal(act_in_s, act_out_s)
+    end
   end
 
   def test_option_output_col_sep
