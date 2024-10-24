@@ -152,7 +152,7 @@ class TestFilter < Minitest::Test
   end
 
   # Return results for CLI-only option (or invalid option).
-  def results_for_cli_option(test_method, option_name)
+  def results_for_cli_option(option_name)
     act_out_s = ''
     act_err_s = ''
     Dir.mktmpdir do |dirpath|
@@ -205,7 +205,7 @@ class TestFilter < Minitest::Test
   def test_invalid_option
     do_test(debugging: true) do
       %w[-Z --ZZZ].each do |option_name|
-        act_out_s, act_err_s = results_for_cli_option(__method__, option_name)
+        act_out_s, act_err_s = results_for_cli_option(option_name)
         assert_empty(act_out_s)
         assert_match(/OptionParser::InvalidOption/, act_err_s)
       end
@@ -227,7 +227,7 @@ class TestFilter < Minitest::Test
   def test_option_h
     do_test(debugging: false) do
       %w[-h --help].each do |option_name|
-        act_out_s, act_err_s = results_for_cli_option(__method__, option_name)
+        act_out_s, act_err_s = results_for_cli_option(option_name)
         assert_match(/Usage/, act_out_s)
         assert_empty(act_err_s)
       end
@@ -237,7 +237,7 @@ class TestFilter < Minitest::Test
   def test_option_v
     do_test(debugging: false) do
       %w[-v --version].each do |option_name|
-        act_out_s, act_err_s = results_for_cli_option(__method__, option_name)
+        act_out_s, act_err_s = results_for_cli_option(option_name)
         assert_match(/\d+\.\d+\.\d+/, act_out_s)
         assert_empty(act_err_s)
       end
