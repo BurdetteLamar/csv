@@ -61,11 +61,11 @@ class TestFilter < Minitest::Test
     %w[ddd eee fff],
   ]
 
-  def soft_assert_equal(exp_s, act_s)
+  def expect_equal(exp_s, act_s)
     assert_equal(exp_s, act_s)
   end
 
-  def soft_refute_equal(exp_s, act_s)
+  def doubt_equal(exp_s, act_s)
     refute_equal(exp_s, act_s)
   end
 
@@ -194,40 +194,44 @@ class TestFilter < Minitest::Test
   # Invalid option.
 
   def test_invalid_option
-    debug('test_method', __method__)
-    %w[-Z --ZZZ].each do |option_name|
-      act_out_s, act_err_s = results_for_cli_option(__method__, option_name)
-      assert_empty(act_out_s)
-      assert_match(/OptionParser::InvalidOption/, act_err_s)
+    do_test(debugging: false) do
+      %w[-Z --ZZZ].each do |option_name|
+        act_out_s, act_err_s = results_for_cli_option(__method__, option_name)
+        assert_empty(act_out_s)
+        assert_match(/OptionParser::InvalidOption/, act_err_s)
+      end
     end
   end
 
   # No options.
 
   def test_no_options
-    debug('test_method', __method__)
-    act_in_s = make_csv_s
-    act_out_s = get_via_api(act_in_s)
-    assert_equal(act_in_s, act_out_s)
+    do_test(debugging: false) do
+      act_in_s = make_csv_s
+      act_out_s = get_via_api(act_in_s)
+      assert_equal(act_in_s, act_out_s)
+    end
   end
 
   # General options
 
   def test_option_h
-    debug('test_method', __method__)
-    %w[-h --help].each do |option_name|
-      act_out_s, act_err_s = results_for_cli_option(__method__, option_name)
-      assert_match(/Usage/, act_out_s)
-      assert_empty(act_err_s)
+    do_test(debugging: false) do
+      %w[-h --help].each do |option_name|
+        act_out_s, act_err_s = results_for_cli_option(__method__, option_name)
+        assert_match(/Usage/, act_out_s)
+        assert_empty(act_err_s)
+      end
     end
   end
 
   def test_option_v
-    debug('test_method', __method__)
-    %w[-v --version].each do |option_name|
-      act_out_s, act_err_s = results_for_cli_option(__method__, option_name)
-      assert_match(/\d+\.\d+\.\d+/, act_out_s)
-      assert_empty(act_err_s)
+    do_test(debugging: false) do
+      %w[-v --version].each do |option_name|
+        act_out_s, act_err_s = results_for_cli_option(__method__, option_name)
+        assert_match(/\d+\.\d+\.\d+/, act_out_s)
+        assert_empty(act_err_s)
+      end
     end
   end
 
@@ -295,221 +299,234 @@ class TestFilter < Minitest::Test
   # Input/output options.
 
   def test_option_c
-    do_test(debugging: true) do
+    do_test(debugging: false) do
       col_sep = 'X'
       act_in_s = make_csv_s(col_sep: col_sep)
       options = [
         Option.new(:col_sep, col_sep)
       ]
       act_out_s = verify_cli(__method__, act_in_s, options)
-      soft_assert_equal(act_in_s, act_out_s)
+      expect_equal(act_in_s, act_out_s)
     end
   end
 
   def test_option_input_col_sep
-    do_test(debugging: true) do
+    do_test(debugging: false) do
       input_col_sep = 'X'
       act_in_s = make_csv_s(col_sep: input_col_sep)
       options = [
         Option.new(:input_col_sep, input_col_sep)
       ]
       act_out_s = verify_cli(__method__, act_in_s, options)
-      soft_refute_equal(act_in_s, act_out_s)
+      doubt_equal(act_in_s, act_out_s)
     end
   end
 
   def test_option_output_col_sep
-    do_test(debugging: true) do
+    do_test(debugging: false) do
       output_col_sep = 'X'
       act_in_s = make_csv_s
       options = [
         Option.new(:output_col_sep, output_col_sep)
       ]
-    act_out_s = verify_cli(__method__, act_in_s, options)
-      soft_refute_equal(act_in_s, act_out_s)
+      act_out_s = verify_cli(__method__, act_in_s, options)
+      doubt_equal(act_in_s, act_out_s)
     end
   end
 
   def test_options_c_and_input_col_sep
-    debug('test_method', __method__)
-    input_col_sep = 'X'
-    col_sep = 'Y'
-    act_in_s = make_csv_s(col_sep: input_col_sep)
-    options = [
-      Option.new(:input_col_sep, input_col_sep),
-      Option.new(:col_sep, col_sep),
-    ]
-    # col_sep overrides input_col_sep.
-    act_out_s = verify_cli(__method__, act_in_s, options)
-    assert_equal(act_in_s, act_out_s)
-    # input_col_sep overrides col_sep.
-    act_out_s = verify_cli(__method__, act_in_s, options.reverse)
-    refute_equal(act_in_s, act_out_s)
+    do_test(debugging: false) do
+      debug('test_method', __method__)
+      input_col_sep = 'X'
+      col_sep = 'Y'
+      act_in_s = make_csv_s(col_sep: input_col_sep)
+      options = [
+        Option.new(:input_col_sep, input_col_sep),
+        Option.new(:col_sep, col_sep),
+      ]
+      # col_sep overrides input_col_sep.
+      act_out_s = verify_cli(__method__, act_in_s, options)
+      expect_equal(act_in_s, act_out_s)
+      # input_col_sep overrides col_sep.
+      act_out_s = verify_cli(__method__, act_in_s, options.reverse)
+      doubt_equal(act_in_s, act_out_s)
+    end
   end
 
   def test_options_c_and_output_col_sep
-    debug('test_method', __method__)
-    col_sep = 'X'
-    output_col_sep = 'Y'
-    act_in_s = make_csv_s(col_sep: col_sep)
-    options = [
-      Option.new(:output_col_sep, output_col_sep),
-      Option.new(:col_sep, col_sep),
-    ]
-    # col_sep overrides output_col_sep.
-    act_out_s = verify_cli(__method__, act_in_s, options)
-    assert_equal(act_in_s, act_out_s)
-    # output_col_sep overrides col_sep.
-    act_out_s = verify_cli(__method__, act_in_s, options.reverse)
-    refute_equal(act_in_s, act_out_s)
+    do_test(debugging: false) do
+      col_sep = 'X'
+      output_col_sep = 'Y'
+      act_in_s = make_csv_s(col_sep: col_sep)
+      options = [
+        Option.new(:output_col_sep, output_col_sep),
+        Option.new(:col_sep, col_sep),
+      ]
+      # col_sep overrides output_col_sep.
+      act_out_s = verify_cli(__method__, act_in_s, options)
+      expect_equal(act_in_s, act_out_s)
+      # output_col_sep overrides col_sep.
+      act_out_s = verify_cli(__method__, act_in_s, options.reverse)
+      doubt_equal(act_in_s, act_out_s)
+    end
   end
 
   def test_options_input_col_sep_and_output_col_sep
-    debug('test_method', __method__)
-    input_col_sep = 'X'
-    output_col_sep = 'Y'
-    act_in_s = make_csv_s(col_sep: input_col_sep)
-    options = [
-      Option.new(:input_col_sep, input_col_sep),
-      Option.new(:output_col_sep, output_col_sep),
-    ]
-    act_out_s = verify_cli(__method__, act_in_s, options)
-    refute_equal(act_in_s, act_out_s)
-    act_out_s = verify_cli(__method__, act_in_s, options.reverse)
-    refute_equal(act_in_s, act_out_s)
+    do_test(debugging: false) do
+      input_col_sep = 'X'
+      output_col_sep = 'Y'
+      act_in_s = make_csv_s(col_sep: input_col_sep)
+      options = [
+        Option.new(:input_col_sep, input_col_sep),
+        Option.new(:output_col_sep, output_col_sep),
+      ]
+      act_out_s = verify_cli(__method__, act_in_s, options)
+      doubt_equal(act_in_s, act_out_s)
+      act_out_s = verify_cli(__method__, act_in_s, options.reverse)
+      doubt_equal(act_in_s, act_out_s)
+    end
   end
 
   def test_option_r
-    debug('test_method', __method__)
-    row_sep = 'X'
-    act_in_s = make_csv_s(row_sep: row_sep)
-    options = [
-      Option.new(:row_sep, row_sep)
-    ]
-    act_out_s = verify_cli(__method__, act_in_s, options)
-    assert_equal(act_in_s, act_out_s)
+    do_test(debugging: false) do
+      row_sep = 'X'
+      act_in_s = make_csv_s(row_sep: row_sep)
+      options = [
+        Option.new(:row_sep, row_sep)
+      ]
+      act_out_s = verify_cli(__method__, act_in_s, options)
+      expect_equal(act_in_s, act_out_s)
+    end
   end
 
   def test_option_input_row_sep
-    debug('test_method', __method__)
-    input_row_sep = 'A'
-    act_in_s = make_csv_s(row_sep: input_row_sep)
-    options = [
-      Option.new(:input_row_sep, input_row_sep)
-    ]
-    act_out_s = verify_cli(__method__, act_in_s, options)
-    refute_equal(act_in_s, act_out_s)
+    do_test(debugging: false) do
+      input_row_sep = 'A'
+      act_in_s = make_csv_s(row_sep: input_row_sep)
+      options = [
+        Option.new(:input_row_sep, input_row_sep)
+      ]
+      act_out_s = verify_cli(__method__, act_in_s, options)
+      doubt_equal(act_in_s, act_out_s)
+    end
   end
 
   def test_option_output_row_sep
-    debug('test_method', __method__)
-    output_row_sep = 'A'
-    act_in_s = make_csv_s(row_sep: output_row_sep)
-    options = [
-      Option.new(:input_row_sep, output_row_sep)
-    ]
-    act_out_s = verify_cli(__method__, act_in_s, options)
-    refute_equal(act_in_s, act_out_s)
+    do_test(debugging: false) do
+      output_row_sep = 'A'
+      act_in_s = make_csv_s(row_sep: output_row_sep)
+      options = [
+        Option.new(:input_row_sep, output_row_sep)
+      ]
+      act_out_s = verify_cli(__method__, act_in_s, options)
+      doubt_equal(act_in_s, act_out_s)
+    end
   end
 
   def test_options_r_and_input_row_sep
-    debug('test_method', __method__)
-    input_row_sep = 'X'
-    row_sep = 'Y'
-    act_in_s = make_csv_s(row_sep: input_row_sep)
-    options = [
-      Option.new(:input_row_sep, input_row_sep),
-      Option.new(:row_sep, row_sep),
-    ]
-    # row_sep overrides input_row_sep.
-    act_out_s = verify_cli(__method__, act_in_s, options)
-    refute_equal(act_in_s, act_out_s)
-    # input_row_sep overrides row_sep.
-    act_out_s = verify_cli(__method__, act_in_s, options.reverse)
-    refute_equal(act_in_s, act_out_s)
+    do_test(debugging: false) do
+      input_row_sep = 'X'
+      row_sep = 'Y'
+      act_in_s = make_csv_s(row_sep: input_row_sep)
+      options = [
+        Option.new(:input_row_sep, input_row_sep),
+        Option.new(:row_sep, row_sep),
+      ]
+      # row_sep overrides input_row_sep.
+      act_out_s = verify_cli(__method__, act_in_s, options)
+      doubt_equal(act_in_s, act_out_s)
+      # input_row_sep overrides row_sep.
+      act_out_s = verify_cli(__method__, act_in_s, options.reverse)
+      doubt_equal(act_in_s, act_out_s)
+    end
   end
 
   def test_options_r_and_output_row_sep
-    debug('test_method', __method__)
-    row_sep = 'X'
-    output_row_sep = 'Y'
-    act_in_s = make_csv_s(row_sep: row_sep)
-    options = [
-      Option.new(:output_row_sep, output_row_sep),
-      Option.new(:row_sep, row_sep),
-    ]
-    # row_sep overrides output_row_sep.
-    act_out_s = verify_cli(__method__, act_in_s, options)
-    assert_equal(act_in_s, act_out_s)
-    # output_row_sep overrides row_sep.
-    act_out_s = verify_cli(__method__, act_in_s, options.reverse)
-    refute_equal(act_in_s, act_out_s)
+    do_test(debugging: false) do
+      row_sep = 'X'
+      output_row_sep = 'Y'
+      act_in_s = make_csv_s(row_sep: row_sep)
+      options = [
+        Option.new(:output_row_sep, output_row_sep),
+        Option.new(:row_sep, row_sep),
+      ]
+      # row_sep overrides output_row_sep.
+      act_out_s = verify_cli(__method__, act_in_s, options)
+      expect_equal(act_in_s, act_out_s)
+      # output_row_sep overrides row_sep.
+      act_out_s = verify_cli(__method__, act_in_s, options.reverse)
+      doubt_equal(act_in_s, act_out_s)
+    end
   end
 
   def test_options_input_row_sep_and_output_row_sep
-    debug('test_method', __method__)
-    input_row_sep = 'X'
-    output_row_sep = 'Y'
-    act_in_s = make_csv_s(row_sep: input_row_sep)
-    options = [
-      Option.new(:input_row_sep, input_row_sep),
-      Option.new(:output_row_sep, output_row_sep),
-    ]
-    # row_sep overrides output_row_sep.
-    act_out_s = verify_cli(__method__, act_in_s, options)
-    refute_equal(act_in_s, act_out_s)
-    # output_row_sep overrides row_sep.
-    act_out_s = verify_cli(__method__, act_in_s, options.reverse)
-    refute_equal(act_in_s, act_out_s)
+    do_test(debugging: false) do
+      input_row_sep = 'X'
+      output_row_sep = 'Y'
+      act_in_s = make_csv_s(row_sep: input_row_sep)
+      options = [
+        Option.new(:input_row_sep, input_row_sep),
+        Option.new(:output_row_sep, output_row_sep),
+      ]
+      # row_sep overrides output_row_sep.
+      act_out_s = verify_cli(__method__, act_in_s, options)
+      doubt_equal(act_in_s, act_out_s)
+      # output_row_sep overrides row_sep.
+      act_out_s = verify_cli(__method__, act_in_s, options.reverse)
+      doubt_equal(act_in_s, act_out_s)
+    end
   end
 
   def test_option_q
-    debug('test_method', __method__)
-    quote_char = "'"
-    rows = [
-      ['foo', 0],
-      ["'bar'", 1],
-      ['"baz"', 2],
-    ]
-    act_in_s = make_csv_s(rows: rows, quote_char: quote_char)
-    options = [
-      Option.new(:quote_char, quote_char)
-    ]
-    act_out_s = verify_cli(__method__, act_in_s, options)
-    assert_equal(act_in_s, act_out_s)
+    do_test(debugging: false) do
+      quote_char = "'"
+      rows = [
+        ['foo', 0],
+        ["'bar'", 1],
+        ['"baz"', 2],
+      ]
+      act_in_s = make_csv_s(rows: rows, quote_char: quote_char)
+      options = [
+        Option.new(:quote_char, quote_char)
+      ]
+      act_out_s = verify_cli(__method__, act_in_s, options)
+      expect_equal(act_in_s, act_out_s)
+    end
   end
 
   def test_option_input_quote_char
-    debug('test_method', __method__)
-    input_quote_char = "'"
-    rows = [
-      ['foo', 0],
-      ["'bar'", 1],
-      ['"baz"', 2],
-    ]
-    act_in_s = make_csv_s(rows: rows, quote_char: input_quote_char)
-    options = [
-      Option.new(:input_quote_char, input_quote_char)
-    ]
-    act_out_s = verify_cli(__method__, act_in_s, options)
-    refute_equal(act_in_s, act_out_s)
+    do_test(debugging: false) do
+      input_quote_char = "'"
+      rows = [
+        ['foo', 0],
+        ["'bar'", 1],
+        ['"baz"', 2],
+      ]
+      act_in_s = make_csv_s(rows: rows, quote_char: input_quote_char)
+      options = [
+        Option.new(:input_quote_char, input_quote_char)
+      ]
+      act_out_s = verify_cli(__method__, act_in_s, options)
+      doubt_equal(act_in_s, act_out_s)
+    end
   end
 
   def test_option_output_quote_char
-    debug('test_method', __method__)
-    output_quote_char = "X"
-    rows = [
-      ['foo', 0],
-      ["'bar'", 1],
-      ['"baz"', 2],
-    ]
-    act_in_s = make_csv_s(rows: rows)
-    options = [
-      Option.new(:output_quote_char, output_quote_char),
-      Option.new(:force_quotes, true)
-    ]
-    act_out_s = verify_cli(__method__, act_in_s, options)
-    refute_equal(act_in_s, act_out_s)
+    do_test(debugging: false) do
+      output_quote_char = "X"
+      rows = [
+        ['foo', 0],
+        ["'bar'", 1],
+        ['"baz"', 2],
+      ]
+      act_in_s = make_csv_s(rows: rows)
+      options = [
+        Option.new(:output_quote_char, output_quote_char),
+        Option.new(:force_quotes, true)
+      ]
+      act_out_s = verify_cli(__method__, act_in_s, options)
+      doubt_equal(act_in_s, act_out_s)
+    end
   end
 
 end
